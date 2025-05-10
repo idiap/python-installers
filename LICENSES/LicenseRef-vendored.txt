@@ -1,0 +1,4 @@
+The files in the vendor directories are not used as part of the code logic
+and only serve as data for testing purposes.
+
+They are binaries from their respective packages following their license(s).
