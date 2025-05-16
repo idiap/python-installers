@@ -14,10 +14,12 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	conda "github.com/paketo-buildpacks/python-installers/pkg/installers/conda"
+
+	// miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
+	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
 	"github.com/sclevine/spec"
 
@@ -31,7 +33,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		workingDir string
 		buffer     *bytes.Buffer
 
+		parsePythonVersion *poetryfakes.PyProjectPythonVersionParser
+
 		detect packit.DetectFunc
+
+		plans []packit.BuildPlan
 	)
 
 	it.Before(func() {
@@ -42,7 +48,55 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		detect = pythoninstallers.Detect(logger)
+		parsePythonVersion = &poetryfakes.PyProjectPythonVersionParser{}
+		parsePythonVersion.ParsePythonVersionCall.Returns.String = "1.2.3"
+
+		detect = pythoninstallers.Detect(logger, parsePythonVersion)
+
+		plans = append(plans, packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{
+				{Name: pip.Pip},
+			},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: pip.CPython,
+					Metadata: pip.BuildPlanMetadata{
+						Build: true,
+					},
+				},
+			},
+		},
+		)
+
+		plans = append(plans, packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{
+				{Name: "conda"},
+			},
+		},
+		)
+
+		plans = append(plans, packit.BuildPlan{
+			Provides: []packit.BuildPlanProvision{
+				{Name: "pipenv"},
+			},
+			Requires: []packit.BuildPlanRequirement{
+				{
+					Name: pipenv.Pip,
+					Metadata: pipenv.BuildPlanMetadata{
+						Build:  true,
+						Launch: false,
+					},
+				},
+				{
+					Name: pipenv.CPython,
+					Metadata: pipenv.BuildPlanMetadata{
+						Build:  true,
+						Launch: false,
+					},
+				},
+			},
+		},
+		)
 	})
 
 	it.After(func() {
@@ -50,198 +104,54 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("detection phase", func() {
-		context("When only an environment.yml file is present", func() {
-			it.Before(func() {
-				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
-				Expect(os.WriteFile(filepath.Join(workingDir, "environment.yml"), []byte{}, os.ModePerm)).To(Succeed())
-			})
-
+		context("without pyproject.toml", func() {
 			it("passes detection", func() {
 				result, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(packit.BuildPlan{
-					Provides: []packit.BuildPlanProvision{
-						{
-							Name: conda.CondaEnvPlanEntry,
-						},
-					},
-					Requires: []packit.BuildPlanRequirement{
-						{
-							Name: conda.CondaPlanEntry,
-							Metadata: map[string]interface{}{
-								"build": true,
-							},
-						},
-					},
-				}))
 
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(pythoninstallers.Or(plans...)))
 			})
 		})
 
-		context("When only a package-list.txt file is present", func() {
+		context("with pyproject.toml", func() {
 			it.Before(func() {
-				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
-				Expect(os.WriteFile(filepath.Join(workingDir, "package-list.txt"), []byte{}, os.ModePerm)).To(Succeed())
-			})
-
-			it("passes detection", func() {
-				result, err := detect(packit.DetectContext{
-					WorkingDir: workingDir,
-				})
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(packit.BuildPlan{
-					Provides: []packit.BuildPlanProvision{
-						{
-							Name: conda.CondaEnvPlanEntry,
-						},
-					},
-					Requires: []packit.BuildPlanRequirement{
-						{
-							Name: conda.CondaPlanEntry,
-							Metadata: map[string]interface{}{
-								"build": true,
-							},
-						},
-					},
-				}))
-			})
-		})
-
-		context("When only a requirements.txt file is present", func() {
-			it.Before(func() {
-				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
-				Expect(os.WriteFile(filepath.Join(workingDir, "requirements.txt"), []byte{}, os.ModePerm)).To(Succeed())
-			})
-
-			it("passes detection", func() {
-				result, err := detect(packit.DetectContext{
-					WorkingDir: workingDir,
-				})
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(packit.BuildPlan{
-					Provides: []packit.BuildPlanProvision{
-						{
-							Name: pip.SitePackages,
-						},
-						{
-							Name: pip.Manager,
-						},
-					},
-					Requires: []packit.BuildPlanRequirement{
-						{
-							Name: pip.CPython,
-							Metadata: pip.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: pip.Pip,
-							Metadata: pip.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: pip.Manager,
-							Metadata: pip.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-					},
-				}))
-			})
-		})
-
-		context("When only a Pipfile file is present", func() {
-			it.Before(func() {
-				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
-				Expect(os.WriteFile(filepath.Join(workingDir, "Pipfile"), []byte{}, os.ModePerm)).To(Succeed())
-			})
-
-			it("passes detection", func() {
-				result, err := detect(packit.DetectContext{
-					WorkingDir: workingDir,
-				})
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(packit.BuildPlan{
-					Provides: []packit.BuildPlanProvision{
-						{
-							Name: pipenv.SitePackages,
-						},
-						{
-							Name: pipenv.Manager,
-						},
-					},
-					Requires: []packit.BuildPlanRequirement{
-						{
-							Name: pipenv.CPython,
-							Metadata: pipenv.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: pipenv.Pipenv,
-							Metadata: pipenv.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: pipenv.Manager,
-							Metadata: pipenv.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-					},
-				}))
-			})
-		})
-
-		context("When only a pyproject.toml file is present", func() {
-			it.Before(func() {
-				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
 				Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte{}, os.ModePerm)).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
 			})
 
 			it("passes detection", func() {
 				result, err := detect(packit.DetectContext{
 					WorkingDir: workingDir,
 				})
+
+				plans = append(plans,
+					packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{
+							{Name: "poetry"},
+						},
+						Requires: []packit.BuildPlanRequirement{
+							{
+								Name: poetry.Pip,
+								Metadata: poetry.BuildPlanMetadata{
+									Build: true,
+								},
+							},
+							{
+								Name: poetry.CPython,
+								Metadata: poetry.BuildPlanMetadata{
+									Build:         true,
+									Version:       "1.2.3",
+									VersionSource: "pyproject.toml",
+								},
+							},
+						},
+					},
+				)
+
 				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(packit.BuildPlan{
-					Provides: []packit.BuildPlanProvision{
-						{
-							Name: poetry.PoetryVenv,
-						},
-					},
-					Requires: []packit.BuildPlanRequirement{
-						{
-							Name: poetry.CPython,
-							Metadata: poetry.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
-							Name: poetry.Poetry,
-							Metadata: poetry.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-					},
-				}))
-			})
-		})
-
-		context("When no python related files are present", func() {
-			it.Before(func() {
-				Expect(os.RemoveAll(filepath.Join(workingDir, "x.py"))).To(Succeed())
-			})
-
-			it("fails detection", func() {
-				_, err := detect(packit.DetectContext{
-					WorkingDir: workingDir,
-				})
-				Expect(err).To(MatchError(ContainSubstring("No python packager manager related files found")))
+				Expect(result.Plan).To(Equal(pythoninstallers.Or(plans...)))
 			})
 		})
 	})

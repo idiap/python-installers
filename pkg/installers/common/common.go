@@ -7,18 +7,19 @@ package pythoninstallers
 
 import (
 	"github.com/paketo-buildpacks/packit/v2/chronos"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 )
 
 type SBOMGenerator interface {
-	Generate(dir string) (sbom.SBOM, error)
+	GenerateFromDependency(dependency postal.Dependency, path string) (sbom.SBOM, error)
 }
 
 type Generator struct{}
 
-func (f Generator) Generate(dir string) (sbom.SBOM, error) {
-	return sbom.Generate(dir)
+func (f Generator) GenerateFromDependency(dependency postal.Dependency, path string) (sbom.SBOM, error) {
+	return sbom.GenerateFromDependency(dependency, path)
 }
 
 // CommonBuildParameters are the parameters shared

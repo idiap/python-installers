@@ -9,17 +9,17 @@ import (
 	"os"
 
 	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/paketo-buildpacks/packit/v2/cargo"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
-	"github.com/paketo-buildpacks/packit/v2/draft"
-	"github.com/paketo-buildpacks/packit/v2/fs"
 	"github.com/paketo-buildpacks/packit/v2/pexec"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
 	pkgcommon "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
-	// conda "github.com/paketo-buildpacks/python-installers/pkg/installers/conda"
-	// pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
-	// pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
-	// poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
+	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
+	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
+	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
+	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 )
 
 func main() {
@@ -31,28 +31,30 @@ func main() {
 		Logger:        logger,
 	}
 
-	// packagerParameters := map[string]pythoninstallers.PackagerParameters{
-	// 	conda.CondaEnvPlanEntry: conda.CondaBuildParameters{
-	// 		Runner: conda.NewCondaRunner(pexec.NewExecutable("conda"), fs.NewChecksumCalculator(), logger),
-	// 	},
-	// 	pip.Manager: pip.PipBuildParameters{
-	// 		InstallProcess:      pip.NewpipProcess(pexec.NewExecutable("pip"), logger),
-	// 		SitePackagesProcess: pip.NewSiteProcess(pexec.NewExecutable("python")),
-	// 	},
-	// 	pipenv.Manager: pipenv.PipEnvBuildParameters{
-	// 		InstallProcess: pipenv.NewpipenvProcess(pexec.NewExecutable("pipenv"), logger),
-	// 		SiteProcess:    pipenv.NewSiteProcess(pexec.NewExecutable("python")),
-	// 		VenvDirLocator: pipenv.NewVenvLocator(),
-	// 	},
-	// 	poetry.PoetryVenv: poetry.PoetryEnvBuildParameters{
-	// 		EntryResolver:           draft.NewPlanner(),
-	// 		InstallProcess:          poetry.NewpoetryProcess(pexec.NewExecutable("poetry"), logger),
-	// 		PythonPathLookupProcess: poetry.NewPythonPathProcess(),
-	// 	},
-	// }
+	packagerParameters := map[string]pythoninstallers.PackagerParameters{
+		miniconda.Conda: miniconda.CondaBuildParameters{
+			DependencyManager: postal.NewService(cargo.NewTransport()),
+			Runner:            miniconda.NewScriptRunner(pexec.NewExecutable("bash")),
+		},
+		pip.Pip: pip.PipBuildParameters{
+			DependencyManager:  postal.NewService(cargo.NewTransport()),
+			InstallProcess:     pip.NewPipInstallProcess(pexec.NewExecutable("python")),
+			SitePackageProcess: pip.NewSiteProcess(pexec.NewExecutable("python")),
+		},
+		pipenv.Pipenv: pipenv.PipEnvBuildParameters{
+			DependencyManager:  postal.NewService(cargo.NewTransport()),
+			InstallProcess:     pipenv.NewPipenvInstallProcess(pexec.NewExecutable("pip")),
+			SitePackageProcess: pipenv.NewSiteProcess(pexec.NewExecutable("python")),
+		},
+		poetry.PoetryDependency: poetry.PoetryBuildParameters{
+			DependencyManager:  postal.NewService(cargo.NewTransport()),
+			InstallProcess:     poetry.NewPoetryInstallProcess(pexec.NewExecutable("python")),
+			SitePackageProcess: poetry.NewSiteProcess(pexec.NewExecutable("python")),
+		},
+	}
 
 	packit.Run(
-		pythoninstallers.Detect(logger),
-		// pythoninstallers.Build(logger, buildParameters, packagerParameters),
+		pythoninstallers.Detect(logger, poetry.NewPyProjectParser()),
+		pythoninstallers.Build(logger, buildParameters, packagerParameters),
 	)
 }

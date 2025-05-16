@@ -7,19 +7,24 @@ package pythoninstallers_test
 
 import (
 	"bytes"
-	// "os"
-	// "path/filepath"
+	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
+
+	//nolint Ignore SA1019, informed usage of deprecated package
+	"github.com/paketo-buildpacks/packit/v2/paketosbom"
+	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
 	pkgcommon "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
-	conda "github.com/paketo-buildpacks/python-installers/pkg/installers/conda"
-	condafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/conda/fakes"
+	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
+	minicondafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/pip/fakes"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
@@ -27,10 +32,14 @@ import (
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
-	"github.com/sclevine/spec"
-
 	. "github.com/onsi/gomega"
+	"github.com/sclevine/spec"
 )
+
+type TestPlan struct {
+	Plan             packit.BuildpackPlan
+	OutputLayerCount int
+}
 
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
@@ -47,27 +56,30 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		// common
 		sbomGenerator *pipfakes.SBOMGenerator
+		// dependencyManager *pipfakes.DependencyManager
 
 		// conda
-		runner *condafakes.Runner
+		minicondaDependencyManager *minicondafakes.DependencyManager
+		runner                     *minicondafakes.Runner
 
 		// pip
-		pipProcess      *pipfakes.InstallProcess
-		pipSitePackagesProcess *pipfakes.SitePackagesProcess
+		pipDependencyManager  *pipfakes.DependencyManager
+		pipInstallProcess     *pipfakes.InstallProcess
+		pipSitePackageProcess *pipfakes.SitePackageProcess
 
 		// pipenv
-		pipenvProcess      *pipenvfakes.InstallProcess
-		pipenvSitePackagesProcess *pipenvfakes.SitePackagesProcess
-		pipenvVenvDirLocator      *pipenvfakes.VenvDirLocator
+		pipenvDependencyManager  *pipenvfakes.DependencyManager
+		pipenvProcess            *pipenvfakes.InstallProcess
+		pipenvSitePackageProcess *pipenvfakes.SitePackageProcess
 
 		// poetry
-		poetryEntryResolver     *poetryfakes.EntryResolver
-		poetryProcess    *poetryfakes.InstallProcess
-		poetryPythonPathProcess *poetryfakes.PythonPathLookupProcess
+		poetryDependencyManager  *poetryfakes.DependencyManager
+		poetryProcess            *poetryfakes.InstallProcess
+		poetrySitePackageProcess *poetryfakes.SitePackageProcess
 
 		buildParameters pkgcommon.CommonBuildParameters
 
-		plans []packit.BuildpackPlan
+		testPlans []TestPlan
 	)
 
 	it.Before(func() {
@@ -79,31 +91,131 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		logger = scribe.NewEmitter(buffer)
 
 		sbomGenerator = &pipfakes.SBOMGenerator{}
-		sbomGenerator.GenerateCall.Returns.SBOM = sbom.SBOM{}
+		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
-		// conda
-		runner = &condafakes.Runner{}
-		runner.ShouldRunCall.Returns.Bool = true
-		runner.ShouldRunCall.Returns.String = "some-sha"
+		// miniconda
+		minicondaDependencyManager = &minicondafakes.DependencyManager{}
+		minicondaDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:       "miniconda3",
+			Name:     "miniconda3-dependency-name",
+			Checksum: "miniconda3-dependency-sha",
+			Stacks:   []string{"some-stack"},
+			URI:      "miniconda3-dependency-uri",
+			Version:  "miniconda3-dependency-version",
+		}
+
+		// Legacy SBOM
+		minicondaDependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
+			{
+				Name: "miniconda3",
+				Metadata: paketosbom.BOMMetadata{
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
+						Hash:      "miniconda3-dependency-sha",
+					},
+					URI:     "miniconda3-dependency-uri",
+					Version: "miniconda3-dependency-version",
+				},
+			},
+		}
+
+		runner = &minicondafakes.Runner{}
 
 		// pip
-		pipProcess = &pipfakes.InstallProcess{}
-		pipSitePackagesProcess = &pipfakes.SitePackagesProcess{}
-		pipSitePackagesProcess.ExecuteCall.Returns.SitePackagesPath = "some-site-packages-path"
+		pipDependencyManager = &pipfakes.DependencyManager{}
+		pipDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:       "pip",
+			Name:     "Pip",
+			Checksum: "some-sha",
+			Stacks:   []string{"some-stack"},
+			URI:      "some-uri",
+			Version:  "21.0",
+		}
+
+		// Legacy SBOM
+		pipDependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
+			{
+				Name: "pip",
+				Metadata: paketosbom.BOMMetadata{
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
+						Hash:      "pip-dependency-sha",
+					},
+					URI:     "pip-dependency-uri",
+					Version: "pip-dependency-version",
+				},
+			},
+		}
+
+		pipInstallProcess = &pipfakes.InstallProcess{}
+		pipInstallProcess.ExecuteCall.Stub = func(srcPath, targetLayerPath string) error {
+			err := os.MkdirAll(filepath.Join(layersDir, "pip", "lib", "python1.23", "site-packages"), os.ModePerm)
+			if err != nil {
+				return fmt.Errorf("issue with stub call: %s", err)
+			}
+			return nil
+		}
+		pipSitePackageProcess = &pipfakes.SitePackageProcess{}
+		pipSitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pip", "lib", "python1.23", "site-packages")
 
 		// pipenv
+		pipenvDependencyManager = &pipenvfakes.DependencyManager{}
+		pipenvDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:       "pipenv",
+			Name:     "pipenv-dependency-name",
+			Checksum: "pipenv-dependency-sha",
+			Stacks:   []string{"some-stack"},
+			URI:      "pipenv-dependency-uri",
+			Version:  "pipenv-dependency-version",
+		}
+
+		// Legacy SBOM
+		pipenvDependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
+			{
+				Name: "pipenv",
+				Metadata: paketosbom.BOMMetadata{
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
+						Hash:      "pipenv-dependency-sha",
+					},
+					URI:     "pipenv-dependency-uri",
+					Version: "pipenv-dependency-version",
+				},
+			},
+		}
+
 		pipenvProcess = &pipenvfakes.InstallProcess{}
-		pipenvSitePackagesProcess = &pipenvfakes.SitePackagesProcess{}
-		pipenvSitePackagesProcess.ExecuteCall.Returns.SitePackagesPath = "some-site-packages-path"
-		pipenvVenvDirLocator = &pipenvfakes.VenvDirLocator{}
-		pipenvVenvDirLocator.LocateVenvDirCall.Returns.VenvDir = "some-venv-dir"
+		pipenvSitePackageProcess = &pipenvfakes.SitePackageProcess{}
+		pipenvSitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pipenv", "lib", "python3.8", "site-packages")
 
 		// poetry
-		poetryEntryResolver = &poetryfakes.EntryResolver{}
+		poetryDependencyManager = &poetryfakes.DependencyManager{}
+		poetryDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:       "poetry",
+			Name:     "poetry-dependency-name",
+			Checksum: "poetry-dependency-sha",
+			Stacks:   []string{"some-stack"},
+			URI:      "poetry-dependency-uri",
+			Version:  "poetry-dependency-version",
+		}
+
+		poetryDependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
+			{
+				Name: "poetry",
+				Metadata: paketosbom.BOMMetadata{
+					Version: "poetry-dependency-version",
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
+						Hash:      "poetry-dependency-sha",
+					},
+					URI: "poetry-dependency-uri",
+				},
+			},
+		}
+
 		poetryProcess = &poetryfakes.InstallProcess{}
-		poetryProcess.ExecuteCall.Returns.String = "some-venv-dir"
-		poetryPythonPathProcess = &poetryfakes.PythonPathLookupProcess{}
-		poetryPythonPathProcess.ExecuteCall.Returns.String = "some-python-path"
+		poetrySitePackageProcess = &poetryfakes.SitePackageProcess{}
+		poetrySitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "poetry", "lib", "python3.8", "site-packages")
 
 		buildParameters = pkgcommon.CommonBuildParameters{
 			SbomGenerator: pkgcommon.Generator{},
@@ -112,22 +224,24 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}
 
 		packagerParameters := map[string]pythoninstallers.PackagerParameters{
-			conda.CondaEnvPlanEntry: conda.CondaBuildParameters{
-				Runner: runner,
+			miniconda.Conda: miniconda.CondaBuildParameters{
+				DependencyManager: minicondaDependencyManager,
+				Runner:            runner,
 			},
-			pip.Manager: pip.PipBuildParameters{
-				InstallProcess:      pipProcess,
-				SitePackagesProcess: pipSitePackagesProcess,
+			pip.Pip: pip.PipBuildParameters{
+				DependencyManager:  pipDependencyManager,
+				InstallProcess:     pipInstallProcess,
+				SitePackageProcess: pipSitePackageProcess,
 			},
-			pipenv.Manager: pipenv.PipEnvBuildParameters{
-				InstallProcess: pipenvProcess,
-				SiteProcess:    pipenvSitePackagesProcess,
-				VenvDirLocator: pipenvVenvDirLocator,
+			pipenv.Pipenv: pipenv.PipEnvBuildParameters{
+				DependencyManager:  pipenvDependencyManager,
+				InstallProcess:     pipenvProcess,
+				SitePackageProcess: pipenvSitePackageProcess,
 			},
-			poetry.PoetryVenv: poetry.PoetryEnvBuildParameters{
-				EntryResolver:           poetryEntryResolver,
-				InstallProcess:          poetryProcess,
-				PythonPathLookupProcess: poetryPythonPathProcess,
+			poetry.PoetryDependency: poetry.PoetryBuildParameters{
+				DependencyManager:  poetryDependencyManager,
+				InstallProcess:     poetryProcess,
+				SitePackageProcess: poetrySitePackageProcess,
 			},
 		}
 
@@ -147,64 +261,61 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			Stack:    "some-stack",
 		}
 
-		plans = []packit.BuildpackPlan{
-			packit.BuildpackPlan{
-				Entries: []packit.BuildpackPlanEntry{
-					{
-						Name: conda.CondaEnvPlanEntry,
-					},
-					{
-						Name: pip.Manager,
-					},
-					{
-						Name: pipenv.Manager,
-					},
-					{
-						Name: poetry.PoetryVenv,
+		testPlans = []TestPlan{
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: miniconda.Conda,
+						},
 					},
 				},
+				1,
 			},
-			packit.BuildpackPlan{
-				Entries: []packit.BuildpackPlanEntry{
-					{
-						Name: conda.CondaEnvPlanEntry,
-					},
-					{
-						Name: pip.Manager,
-					},
-					{
-						Name: pipenv.Manager,
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: pip.Pip,
+						},
 					},
 				},
+				2,
 			},
-			packit.BuildpackPlan{
-				Entries: []packit.BuildpackPlanEntry{
-					{
-						Name: conda.CondaEnvPlanEntry,
-					},
-					{
-						Name: pip.Manager,
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: pipenv.Pipenv,
+						},
 					},
 				},
+				1,
 			},
-			packit.BuildpackPlan{
-				Entries: []packit.BuildpackPlanEntry{
-					{
-						Name: conda.CondaEnvPlanEntry,
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: poetry.PoetryDependency,
+						},
 					},
 				},
+				1,
 			},
 		}
+		Expect(os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
 	})
 
 	it("runs the build process and returns expected layers", func() {
-		for _, plan := range plans {
-			buildContext.Plan = plan
+		for _, testPlan := range testPlans {
+			logger.Detail("Doing: %s", testPlan)
+			buildContext.Plan = testPlan.Plan
 			result, err := build(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			layers := result.Layers
-			Expect(layers).To(HaveLen(len(plan.Entries)))
+			Expect(layers).To(HaveLen(testPlan.OutputLayerCount))
 		}
 	})
 
@@ -213,8 +324,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		build = pythoninstallers.Build(logger, buildParameters, packagerParameters)
 
-		for _, plan := range plans {
-			buildContext.Plan = plan
+		for _, testPlan := range testPlans {
+			buildContext.Plan = testPlan.Plan
 			_, err := build(buildContext)
 			Expect(err).To(HaveOccurred())
 		}

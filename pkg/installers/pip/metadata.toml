@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: © 2025 Idiap Research Institute <contact@idiap.ch>
+# SPDX-FileContributor: Samuel Gaist <samuel.gaist@idiap.ch>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[metadata]
+  [[metadata.dependencies]]
+    checksum = "sha256:e100bda0c7e0dd20c6a471dbddb027698c3a96263fe7c0d5c196953eb8e82281"
+    cpe = "cpe:2.3:a:pypa:pip:24.1.2:*:*:*:*:python:*:*"
+    id = "pip"
+    licenses = ["MIT"]
+    purl = "pkg:generic/pip@24.1.2?checksum=e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff&download_url=https://files.pythonhosted.org/packages/12/3d/d899257cace386bebb7bdf8a872d5fe3b935cc6381c3ddb76d3e5d99890d/pip-24.1.2.tar.gz"
+    source = "https://files.pythonhosted.org/packages/12/3d/d899257cace386bebb7bdf8a872d5fe3b935cc6381c3ddb76d3e5d99890d/pip-24.1.2.tar.gz"
+    source-checksum = "sha256:e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff"
+    stacks = ["*"]
+    uri = "https://artifacts.paketo.io/pip/pip_24.1.2_noarch_e100bda0.tgz"
+    version = "24.1.2"
+
+  [[metadata.dependencies]]
+    checksum = "sha256:822dd89d0c3f68bd59e89afaf1e486829b010c2fb05e8c1e9f8b3fb1d4053206"
+    cpe = "cpe:2.3:a:pypa:pip:24.2.0:*:*:*:*:python:*:*"
+    id = "pip"
+    licenses = ["MIT"]
+    purl = "pkg:generic/pip@24.2.0?checksum=5b5e490b5e9cb275c879595064adce9ebd31b854e3e803740b72f9ccf34a45b8&download_url=https://files.pythonhosted.org/packages/4d/87/fb90046e096a03aeab235e139436b3fe804cdd447ed2093b0d70eba3f7f8/pip-24.2.tar.gz"
+    source = "https://files.pythonhosted.org/packages/4d/87/fb90046e096a03aeab235e139436b3fe804cdd447ed2093b0d70eba3f7f8/pip-24.2.tar.gz"
+    source-checksum = "sha256:5b5e490b5e9cb275c879595064adce9ebd31b854e3e803740b72f9ccf34a45b8"
+    stacks = ["*"]
+    uri = "https://artifacts.paketo.io/pip/pip_24.2.0_noarch_822dd89d.tgz"
+    version = "24.2.0"
+
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "pip"
+    patches = 2
