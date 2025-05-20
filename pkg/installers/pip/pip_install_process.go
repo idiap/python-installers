@@ -7,8 +7,9 @@ package pip
 import (
 	"bytes"
 	"fmt"
-	"github.com/paketo-buildpacks/packit/v2/pexec"
 	"os"
+
+	"github.com/paketo-buildpacks/packit/v2/pexec"
 )
 
 //go:generate faux --interface Executable --output fakes/executable.go

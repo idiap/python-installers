@@ -1,0 +1,203 @@
+// SPDX-FileCopyrightText: Copyright (c) 2013-Present CloudFoundry.org Foundation, Inc. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package integration_test
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/joshuatcasey/collections"
+	"github.com/paketo-buildpacks/occam"
+	"github.com/sclevine/spec"
+
+	. "github.com/onsi/gomega"
+	. "github.com/paketo-buildpacks/occam/matchers"
+)
+
+func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
+	var (
+		Expect     = NewWithT(t).Expect
+		Eventually = NewWithT(t).Eventually
+
+		pack   occam.Pack
+		docker occam.Docker
+
+		imageIDs     *collections.Set[string]
+		containerIDs *collections.Set[string]
+
+		name   string
+		source string
+	)
+
+	it.Before(func() {
+		var err error
+		name, err = occam.RandomName()
+		Expect(err).NotTo(HaveOccurred())
+
+		pack = occam.NewPack()
+		docker = occam.NewDocker()
+
+		imageIDs = collections.NewSet()
+		containerIDs = collections.NewSet()
+
+		source, err = occam.Source(filepath.Join("testdata", "default_app"))
+		Expect(err).ToNot(HaveOccurred())
+	})
+
+	it.After(func() {
+		containerIDs.ForEach(func(id string) {
+			Expect(docker.Container.Remove.Execute(id)).To(Succeed())
+		})
+
+		imageIDs.ForEach(func(id string) {
+			Expect(docker.Image.Remove.Execute(id)).To(Succeed())
+		})
+
+		Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
+		Expect(os.RemoveAll(source)).To(Succeed())
+	})
+
+	context("when the app is rebuilt and the same pipenv version is required", func() {
+		it("reuses the cached pipenv layer", func() {
+			var (
+				err  error
+				logs fmt.Stringer
+
+				firstImage  occam.Image
+				secondImage occam.Image
+
+				secondContainer occam.Container
+			)
+
+			firstImage, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					settings.Buildpacks.CPython,
+					settings.Buildpacks.Pip,
+					settings.Buildpacks.Pipenv,
+					settings.Buildpacks.BuildPlan,
+				).
+				Execute(name, source)
+			Expect(err).ToNot(HaveOccurred(), logs.String)
+
+			imageIDs.Add(firstImage.ID)
+
+			secondImage, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					settings.Buildpacks.CPython,
+					settings.Buildpacks.Pip,
+					settings.Buildpacks.Pipenv,
+					settings.Buildpacks.BuildPlan,
+				).
+				Execute(name, source)
+			Expect(err).ToNot(HaveOccurred(), logs.String)
+
+			imageIDs.Add(secondImage.ID)
+
+			Expect(logs).To(ContainLines(
+				fmt.Sprintf("  Reusing cached layer /layers/%s/pipenv", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
+			))
+
+			secondContainer, err = docker.Container.Run.
+				WithCommand("pipenv --version").
+				Execute(secondImage.ID)
+			Expect(err).ToNot(HaveOccurred())
+
+			containerIDs.Add(secondContainer.ID)
+
+			Eventually(func() string {
+				cLogs, err := docker.Container.Logs.Execute(secondContainer.ID)
+				Expect(err).NotTo(HaveOccurred())
+				return cLogs.String()
+			}).Should(MatchRegexp(`pipenv, version \d+\.\d+\.\d+`))
+
+			Expect(secondImage.Buildpacks[2].Key).To(Equal(buildpackInfo.Buildpack.ID))
+			Expect(secondImage.Buildpacks[2].Layers["pipenv"].SHA).To(Equal(firstImage.Buildpacks[2].Layers["pipenv"].SHA))
+		})
+	})
+
+	context("when the app is rebuilt and a different pipenv version is required", func() {
+		it("rebuilds", func() {
+			var (
+				err  error
+				logs fmt.Stringer
+
+				firstImage  occam.Image
+				secondImage occam.Image
+
+				secondContainer occam.Container
+			)
+
+			firstImage, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					settings.Buildpacks.CPython,
+					settings.Buildpacks.Pip,
+					settings.Buildpacks.Pipenv,
+					settings.Buildpacks.BuildPlan,
+				).
+				WithEnv(map[string]string{"BP_PIPENV_VERSION": buildpackInfo.Metadata.Dependencies[0].Version}).
+				Execute(name, source)
+			Expect(err).ToNot(HaveOccurred(), logs.String)
+
+			secondImage, logs, err = pack.WithNoColor().Build.
+				WithPullPolicy("never").
+				WithBuildpacks(
+					settings.Buildpacks.CPython,
+					settings.Buildpacks.Pip,
+					settings.Buildpacks.Pipenv,
+					settings.Buildpacks.BuildPlan,
+				).
+				WithEnv(map[string]string{"BP_PIPENV_VERSION": buildpackInfo.Metadata.Dependencies[1].Version}).
+				Execute(name, source)
+			Expect(err).ToNot(HaveOccurred(), logs.String)
+
+			imageIDs.Add(secondImage.ID)
+
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+				"  Resolving Pipenv version",
+				"    Candidate version sources (in priority order):",
+				MatchRegexp(`      BP_PIPENV_VERSION -> "\d+\.\d+\.\d+"`),
+				`      <unknown>         -> ""`,
+			))
+			Expect(logs).To(ContainLines(
+				fmt.Sprintf(`    Selected Pipenv version (using BP_PIPENV_VERSION): %s`, buildpackInfo.Metadata.Dependencies[1].Version),
+			))
+			Expect(logs).To(ContainLines(
+				"  Executing build process",
+				MatchRegexp(`    Installing Pipenv \d+\.\d+\.\d+`),
+				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
+			))
+			Expect(logs).To(ContainLines(
+				"  Configuring build environment",
+				MatchRegexp(fmt.Sprintf(`    PYTHONPATH -> "\/layers\/%s\/pipenv\/lib\/python\d+\.\d+\/site-packages:\$PYTHONPATH"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
+				"",
+				"  Configuring launch environment",
+				MatchRegexp(fmt.Sprintf(`    PYTHONPATH -> "\/layers\/%s\/pipenv\/lib\/python\d+\.\d+\/site-packages:\$PYTHONPATH"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
+			))
+
+			secondContainer, err = docker.Container.Run.
+				WithCommand("pipenv --version").
+				Execute(secondImage.ID)
+			Expect(err).ToNot(HaveOccurred())
+
+			containerIDs.Add(secondContainer.ID)
+
+			Eventually(func() string {
+				cLogs, err := docker.Container.Logs.Execute(secondContainer.ID)
+				Expect(err).NotTo(HaveOccurred())
+				return cLogs.String()
+			}).Should(MatchRegexp(`pipenv, version \d+\.\d+\.\d+`))
+
+			Expect(secondImage.Buildpacks[2].Key).To(Equal(buildpackInfo.Buildpack.ID))
+			Expect(secondImage.Buildpacks[2].Layers["pipenv"].SHA).ToNot(Equal(firstImage.Buildpacks[2].Layers["pipenv"].SHA))
+		})
+	})
+}

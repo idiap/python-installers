@@ -35,3 +35,34 @@ func NewBuildpackStore(suffix string) occam.BuildpackStore {
 		&cacheManager,
 	)
 }
+
+type Buildpack struct {
+	ID   string
+	Name string
+}
+
+type Dependency struct {
+	ID      string
+	Version string
+}
+
+type Metadata struct {
+	Dependencies []Dependency
+}
+
+type BuildpackInfo struct {
+	Buildpack Buildpack
+	Metadata  Metadata
+}
+
+func DependenciesForId(dependencies []Dependency, id string) []Dependency {
+	output := []Dependency{}
+
+	for _, entry := range dependencies {
+		if entry.ID == id {
+			output = append(output, entry)
+		}
+	}
+
+	return output
+}

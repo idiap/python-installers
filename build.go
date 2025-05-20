@@ -20,18 +20,24 @@ import (
 type PackagerParameters interface {
 }
 
+func validateResult(result packit.BuildResult, err error) (packit.BuildResult, error) {
+	if err != nil {
+		return packit.BuildResult{}, err
+	}
+
+	return result, err
+}
+
 func Build(
 	logger scribe.Emitter,
 	commonBuildParameters pythoninstallers.CommonBuildParameters,
 	buildParameters map[string]PackagerParameters,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
-		// planEntries := filtered(context.Plan.Entries, pip.SitePackages)
-		layers := []packit.Layer{}
-
 		for _, entry := range context.Plan.Entries {
 			logger.Title("Handling %s", entry.Name)
 			parameters, ok := buildParameters[entry.Name]
+
 			if !ok {
 				return packit.BuildResult{}, packit.Fail.WithMessage("missing parameters for: %s", entry.Name)
 			}
@@ -43,57 +49,37 @@ func Build(
 					commonBuildParameters,
 				)(context)
 
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
+				return validateResult(result, err)
 
-				layers = append(layers, result.Layers...)
 			case pipenv.Pipenv:
 				result, err := pipenv.Build(
 					parameters.(pipenv.PipEnvBuildParameters),
 					commonBuildParameters,
 				)(context)
 
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
+				return validateResult(result, err)
 
-				layers = append(layers, result.Layers...)
 			case miniconda.Conda:
 				result, err := miniconda.Build(
 					parameters.(miniconda.CondaBuildParameters),
 					commonBuildParameters,
 				)(context)
 
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
+				return validateResult(result, err)
 
-				layers = append(layers, result.Layers...)
-				logger.Detail("Don't do anything for: %s with %s", entry.Name, parameters)
 			case poetry.PoetryDependency:
 				result, err := poetry.Build(
 					parameters.(poetry.PoetryBuildParameters),
 					commonBuildParameters,
 				)(context)
 
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
-
-				layers = append(layers, result.Layers...)
+				return validateResult(result, err)
 
 			default:
 				return packit.BuildResult{}, packit.Fail.WithMessage("unknown plan: %s", entry.Name)
 			}
 		}
 
-		if len(layers) == 0 {
-			return packit.BuildResult{}, packit.Fail.WithMessage("empty plan should not happen")
-		}
-
-		return packit.BuildResult{
-			Layers: layers,
-		}, nil
+		return packit.BuildResult{}, packit.Fail.WithMessage("empty plan: %s", context.Plan)
 	}
 }
