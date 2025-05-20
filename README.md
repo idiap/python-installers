@@ -5,11 +5,10 @@ SPDX-FileContributor: Samuel Gaist <samuel.gaist@idiap.ch>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Python Packagers Cloud Native Buildpack
+# Python Installers Cloud Native Buildpack
 
-The Paketo Buildpack for Python Packagers is a Cloud Native Buildpack that
-installs packages using the adequate tool selected based on the content of the
-application sources and makes it available to it.
+The Paketo Buildpack for Python Installers is a Cloud Native Buildpack that
+installs python package managers.
 
 The buildpack is published for consumption at
 `gcr.io/paketo-buildpacks/python-installers` and
@@ -18,14 +17,16 @@ The buildpack is published for consumption at
 ## Behavior
 This buildpack participates if one of the following detection succeeds:
 
-- (conda)[conda/README.md] -> `environment.yml`
-- (pip)[pip/README.md] -> `requirements.txt`
-- (pipenv)[pipenv/README.md] -> `Pipfile`
-- (poetry)[poetry/README.md] -> `pyproject.toml`
+- (miniconda)[installers/pkg/minconda/README.md] -> Always
+- (pip)[installers/ppkg/pip/README.md] -> Always
+- (pipenv)[installers/ppkg/pipenv/README.md] -> Always
+- (poetry)[installers/ppkg/poetry/README.md] -> `pyproject.toml` is present in the root folder
 
 The buildpack will do the following:
 * At build time:
-  - Installs the application packages to a layer made available to the app.
+  - Installs the package manager
+  - Makes it available on the `PATH`
+  - Adjusts `PYTHONPATH` as required
 * At run time:
   - Does nothing
 
