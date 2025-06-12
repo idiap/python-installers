@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/paketo-buildpacks/occam"
@@ -16,12 +17,13 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func testOffline(t *testing.T, context spec.G, it spec.S) {
+func pipTestOffline(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
-		pack       occam.Pack
-		docker     occam.Docker
+
+		pack   occam.Pack
+		docker occam.Docker
 	)
 
 	it.Before(func() {
@@ -29,13 +31,12 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 	})
 
-	context("when offline", func() {
+	context("when the buildpack is run with pack build in offline mode", func() {
 		var (
 			image     occam.Image
 			container occam.Container
-
-			name   string
-			source string
+			name      string
+			source    string
 		)
 
 		it.Before(func() {
@@ -43,7 +44,7 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "default_app"))
+			source, err = occam.Source(filepath.Join("testdata", "pip_app"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -54,34 +55,30 @@ func testOffline(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		it("pack builds and runs the app successfully", func() {
+		it("builds successfully", func() {
 			var err error
-
 			var logs fmt.Stringer
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
+				WithNetwork("none").
 				WithBuildpacks(
-					settings.Buildpacks.Miniconda.Offline,
+					settings.Buildpacks.CPython.Offline,
+					settings.Buildpacks.PythonInstallers.Offline,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithNetwork("none").
 				Execute(name, source)
-
-			Expect(err).NotTo(HaveOccurred(), logs.String())
+			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			container, err = docker.Container.Run.
-				WithCommand("conda info").
-				WithPublish("8080").
-				WithPublishAll().
+				WithCommand("pip --version").
 				Execute(image.ID)
-			Expect(err).NotTo(HaveOccurred())
+			Expect(err).ToNot(HaveOccurred())
 
 			Eventually(func() string {
 				cLogs, err := docker.Container.Logs.Execute(container.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(MatchRegexp(`conda version : \d+\.\d+\.\d+`))
-
+			}).Should(MatchRegexp(fmt.Sprintf(`pip \d+\.\d+(\.\d+)? from /layers/%s/pip/lib/python\d+.\d+/site-packages/pip`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))))
 		})
 	})
 }

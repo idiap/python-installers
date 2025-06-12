@@ -18,7 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
+func minicondaTestReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -44,7 +44,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = map[string]struct{}{}
 		containerIDs = map[string]struct{}{}
 
-		source, err = occam.Source(filepath.Join("testdata", "default_app"))
+		source, err = occam.Source(filepath.Join("testdata", "miniconda_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -76,7 +76,7 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			build := pack.Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.Miniconda.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				)
 
@@ -86,11 +86,11 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			imageIDs[firstImage.ID] = struct{}{}
 
 			Expect(firstImage.Buildpacks).To(HaveLen(2))
-			Expect(firstImage.Buildpacks[0].Key).To(Equal(settings.Buildpack.ID))
+			Expect(firstImage.Buildpacks[0].Key).To(Equal(buildpackInfo.Buildpack.ID))
 			Expect(firstImage.Buildpacks[0].Layers).To(HaveKey("conda"))
 
 			Expect(logs).To(ContainLines(
-				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
 				"  Executing build process",
 				MatchRegexp(`    Installing Miniconda \d+\.\d+\.\d+`),
 				MatchRegexp(`      Completed in ([0-9]*(\.[0-9]*)?[a-z]+)+`),
@@ -112,12 +112,12 @@ func testReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 			imageIDs[secondImage.ID] = struct{}{}
 
 			Expect(secondImage.Buildpacks).To(HaveLen(2))
-			Expect(secondImage.Buildpacks[0].Key).To(Equal(settings.Buildpack.ID))
+			Expect(secondImage.Buildpacks[0].Key).To(Equal(buildpackInfo.Buildpack.ID))
 			Expect(secondImage.Buildpacks[0].Layers).To(HaveKey("conda"))
 
 			Expect(logs).To(ContainLines(
-				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, settings.Buildpack.Name)),
-				MatchRegexp(fmt.Sprintf("  Reusing cached layer /layers/%s/conda", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"))),
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+				MatchRegexp(fmt.Sprintf("  Reusing cached layer /layers/%s/conda", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
 			))
 
 			secondContainer, err = docker.Container.Run.
