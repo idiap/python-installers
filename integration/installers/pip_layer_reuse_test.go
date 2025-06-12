@@ -16,9 +16,11 @@ import (
 
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
+
+	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
 )
 
-func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
+func pipTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -44,7 +46,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = map[string]struct{}{}
 		containerIDs = map[string]struct{}{}
 
-		source, err = occam.Source(filepath.Join("testdata", "default_app"))
+		source, err = occam.Source(filepath.Join("testdata", "pip_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -79,7 +81,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
@@ -97,7 +99,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
@@ -149,14 +151,16 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				secondContainer occam.Container
 			)
 
+			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "pip")
+
 			firstImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIP_VERSION": buildpackInfo.Metadata.Dependencies[0].Version}).
+				WithEnv(map[string]string{"BP_PIP_VERSION": dependencies[0].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -172,10 +176,10 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIP_VERSION": buildpackInfo.Metadata.Dependencies[1].Version}).
+				WithEnv(map[string]string{"BP_PIP_VERSION": dependencies[1].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -215,7 +219,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(secondContainer.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(MatchRegexp(fmt.Sprintf(`pip %s from /layers/%s/pip/lib/python\d+.\d+/site-packages/pip`, strings.Replace(buildpackInfo.Metadata.Dependencies[1].Version, ".0", `(\.\d+)?`, 1), strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))))
+			}).Should(MatchRegexp(fmt.Sprintf(`pip %s from /layers/%s/pip/lib/python\d+.\d+/site-packages/pip`, strings.Replace(dependencies[1].Version, ".0", `(\.\d+)?`, 1), strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))))
 
 			Expect(secondImage.Buildpacks[1].Key).To(Equal(buildpackInfo.Buildpack.ID))
 			Expect(secondImage.Buildpacks[1].Layers["pip"].SHA).ToNot(Equal(firstImage.Buildpacks[1].Layers["pip"].SHA))

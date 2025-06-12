@@ -18,7 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
+func poetryTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -40,7 +40,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		containerIDs = map[string]struct{}{}
 
 		var err error
-		source, err = occam.Source(filepath.Join("testdata", "default_app"))
+		source, err = occam.Source(filepath.Join("testdata", "poetry_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -78,7 +78,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
 					settings.Buildpacks.Pip.Online,
-					settings.Buildpacks.Poetry.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
@@ -104,7 +104,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
 					settings.Buildpacks.Pip.Online,
-					settings.Buildpacks.Poetry.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)

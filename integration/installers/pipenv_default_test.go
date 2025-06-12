@@ -18,7 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func testDefault(t *testing.T, context spec.G, it spec.S) {
+func pipenvTestDefault(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -45,7 +45,7 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "default_app"))
+			source, err = occam.Source(filepath.Join("testdata", "pipenv_app"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -63,10 +63,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
@@ -126,10 +126,10 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				image, logs, err = pack.WithNoColor().Build.
 					WithPullPolicy("never").
 					WithBuildpacks(
-						settings.Buildpacks.CPython,
-						settings.Buildpacks.Pip,
-						settings.Buildpacks.Pipenv,
-						settings.Buildpacks.BuildPlan,
+						settings.Buildpacks.CPython.Online,
+						settings.Buildpacks.Pip.Online,
+						settings.Buildpacks.PythonInstallers.Online,
+						settings.Buildpacks.BuildPlan.Online,
 					).
 					WithEnv(map[string]string{
 						"BP_LOG_LEVEL": "DEBUG",

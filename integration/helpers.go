@@ -5,37 +5,6 @@
 
 package integration_helpers
 
-import (
-	"os"
-	"path/filepath"
-
-	"github.com/ForestEckhardt/freezer"
-	"github.com/ForestEckhardt/freezer/github"
-	"github.com/paketo-buildpacks/occam"
-	"github.com/paketo-buildpacks/occam/packagers"
-)
-
-func NewBuildpackStore(suffix string) occam.BuildpackStore {
-	gitToken := os.Getenv("GIT_TOKEN")
-	cacheManager := freezer.NewCacheManager(filepath.Join(os.Getenv("HOME"), ".freezer-cache", suffix))
-	releaseService := github.NewReleaseService(github.NewConfig("https://api.github.com", gitToken))
-	packager := packagers.NewJam()
-	namer := freezer.NewNameGenerator()
-
-	return occam.NewBuildpackStore().WithLocalFetcher(
-		freezer.NewLocalFetcher(
-			&cacheManager,
-			packager,
-			namer,
-		)).WithRemoteFetcher(
-		freezer.NewRemoteFetcher(
-			&cacheManager,
-			releaseService, packager,
-		)).WithCacheManager(
-		&cacheManager,
-	)
-}
-
 type Buildpack struct {
 	ID   string
 	Name string
@@ -53,6 +22,34 @@ type Metadata struct {
 type BuildpackInfo struct {
 	Buildpack Buildpack
 	Metadata  Metadata
+}
+
+type TestSettings struct {
+	Buildpacks struct {
+		// Dependency buildpacks
+		CPython struct {
+			Online  string
+			Offline string
+		}
+		Pip struct {
+			Online  string
+			Offline string
+		}
+		BuildPlan struct {
+			Online string
+		}
+		// This buildpack
+		PythonInstallers struct {
+			Online  string
+			Offline string
+		}
+	}
+
+	Config struct {
+		CPython   string `json:"cpython"`
+		Pip       string `json:"pip"`
+		BuildPlan string `json:"build-plan"`
+	}
 }
 
 func DependenciesForId(dependencies []Dependency, id string) []Dependency {

@@ -18,7 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func testDefault(t *testing.T, context spec.G, it spec.S) {
+func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -36,9 +36,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 		var (
 			image     occam.Image
 			container occam.Container
-
-			name   string
-			source string
+			name      string
+			source    string
 		)
 
 		it.Before(func() {
@@ -46,9 +45,8 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "default_app"))
+			source, err = occam.Source(filepath.Join("testdata", "poetry_app"))
 			Expect(err).NotTo(HaveOccurred())
-
 		})
 
 		it.After(func() {
@@ -56,35 +54,67 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(docker.Image.Remove.Execute(image.ID)).To(Succeed())
 			Expect(docker.Volume.Remove.Execute(occam.CacheVolumeNames(name))).To(Succeed())
 			Expect(os.RemoveAll(source)).To(Succeed())
+
 		})
 
 		it("builds with the defaults", func() {
-			var (
-				logs fmt.Stringer
-				err  error
-			)
+			var err error
+			var logs fmt.Stringer
 
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.Miniconda.Online,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+				"  Resolving Poetry version",
+				"    Candidate version sources (in priority order):",
+				`      <unknown> -> ""`,
+			))
+			Expect(logs).To(ContainLines(
+				MatchRegexp(`    Selected Poetry version \(using <unknown>\): \d+\.\d+\.\d+`),
+			))
+			Expect(logs).To(ContainLines(
+				"  Executing build process",
+				MatchRegexp(`    Installing Poetry \d+\.\d+\.\d+`),
+				MatchRegexp(`      Completed in \d+\.\d+`),
+			))
+			Expect(logs).To(ContainLines(
+				"  Configuring build environment",
+				MatchRegexp(fmt.Sprintf(`    PYTHONPATH -> "\/layers\/%s\/poetry\/lib\/python\d+\.\d+\/site-packages:\$PYTHONPATH"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
+				"",
+				"  Configuring launch environment",
+				MatchRegexp(fmt.Sprintf(`    PYTHONPATH -> "\/layers\/%s\/poetry\/lib\/python\d+\.\d+\/site-packages:\$PYTHONPATH"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
+			))
+
+			Expect(logs).To(ContainLines(
+				"  Resolving CPython version",
+				"    Candidate version sources (in priority order):",
+				`      pyproject.toml -> "3.9.*"`,
+				`                     -> ""`,
+				`      <unknown>      -> ""`,
+			))
+			Expect(logs).To(ContainLines(
+				MatchRegexp(`\s*Python version \(using pyproject.toml\): 3\.9\.\d+`),
+			))
+
 			container, err = docker.Container.Run.
-				WithCommand("conda info").
-				WithPublish("8080").
-				WithPublishAll().
+				WithCommand("poetry --version").
 				Execute(image.ID)
-			Expect(err).NotTo(HaveOccurred())
+			Expect(err).ToNot(HaveOccurred())
 
 			Eventually(func() string {
 				cLogs, err := docker.Container.Logs.Execute(container.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(MatchRegexp(`conda version : \d+\.\d+\.\d+`))
+			}).Should(MatchRegexp(`Poetry.*version \d+\.\d+\.\d+`))
 		})
 
 		context("validating SBOM", func() {
@@ -109,13 +139,12 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				var err error
 				var logs fmt.Stringer
 
-				source, err = occam.Source(filepath.Join("testdata", "default_app"))
-				Expect(err).NotTo(HaveOccurred())
-
 				image, logs, err = pack.WithNoColor().Build.
 					WithPullPolicy("never").
 					WithBuildpacks(
-						settings.Buildpacks.Miniconda.Online,
+						settings.Buildpacks.CPython.Online,
+						settings.Buildpacks.Pip.Online,
+						settings.Buildpacks.PythonInstallers.Online,
 						settings.Buildpacks.BuildPlan.Online,
 					).
 					WithEnv(map[string]string{
@@ -126,20 +155,18 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 				Expect(err).ToNot(HaveOccurred(), logs.String)
 
 				container, err = docker.Container.Run.
-					WithCommand("conda info").
-					WithPublish("8080").
-					WithPublishAll().
+					WithCommand("poetry --version").
 					Execute(image.ID)
-				Expect(err).NotTo(HaveOccurred())
+				Expect(err).ToNot(HaveOccurred())
 
 				Eventually(func() string {
 					cLogs, err := docker.Container.Logs.Execute(container.ID)
 					Expect(err).NotTo(HaveOccurred())
 					return cLogs.String()
-				}).Should(MatchRegexp(`conda version : \d+\.\d+\.\d+`))
+				}).Should(MatchRegexp(`Poetry.*version \d+\.\d+\.\d+`))
 
 				Expect(logs).To(ContainLines(
-					fmt.Sprintf("  Generating SBOM for /layers/%s/conda", strings.ReplaceAll(settings.Buildpack.ID, "/", "_")),
+					fmt.Sprintf("  Generating SBOM for /layers/%s/poetry", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
 					MatchRegexp(`      Completed in \d+(\.?\d+)*`),
 				))
 				Expect(logs).To(ContainLines(
@@ -159,17 +186,17 @@ func testDefault(t *testing.T, context spec.G, it spec.S) {
 					cLogs, err := docker.Container.Logs.Execute(container2.ID)
 					Expect(err).NotTo(HaveOccurred())
 					return cLogs.String()
-				}).Should(ContainSubstring(`"name":"Miniconda.sh"`))
+				}).Should(ContainSubstring(`"name":"Poetry"`))
 
 				// check that all required SBOM files are present
-				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"), "conda", "sbom.cdx.json")).To(BeARegularFile())
-				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"), "conda", "sbom.spdx.json")).To(BeARegularFile())
-				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"), "conda", "sbom.syft.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "poetry", "sbom.cdx.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "poetry", "sbom.spdx.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "poetry", "sbom.syft.json")).To(BeARegularFile())
 
 				// check an SBOM file to make sure it has an entry for cpython
-				contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(settings.Buildpack.ID, "/", "_"), "conda", "sbom.cdx.json"))
+				contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "poetry", "sbom.cdx.json"))
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(contents)).To(ContainSubstring(`"name": "Miniconda.sh"`))
+				Expect(string(contents)).To(ContainSubstring(`"name": "Poetry"`))
 			})
 		})
 	})

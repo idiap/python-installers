@@ -5,5 +5,5 @@
 [[requires]]
   name = "conda"
 
-  [requires.metadata]
-    launch = true
+[requires.metadata]
+  launch = true
