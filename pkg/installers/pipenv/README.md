@@ -45,7 +45,7 @@ file that looks like the following:
 
   # The Pipenv buildpack supports some non-required metadata options.
   [requires.metadata]
-    
+
     # Use `version` to request a specific version of `pipenv`.
     # This buildpack supports specifying a semver constraint in the form of "2018.*", "2018.11.*",
     # or even "2018.11.26".

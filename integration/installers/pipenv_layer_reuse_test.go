@@ -17,9 +17,11 @@ import (
 
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
+
+	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
 )
 
-func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
+func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -45,7 +47,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = collections.NewSet()
 		containerIDs = collections.NewSet()
 
-		source, err = occam.Source(filepath.Join("testdata", "default_app"))
+		source, err = occam.Source(filepath.Join("testdata", "pipenv_app"))
 		Expect(err).ToNot(HaveOccurred())
 	})
 
@@ -77,10 +79,10 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			firstImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
@@ -90,10 +92,10 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 			secondImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
@@ -134,27 +136,29 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				secondContainer occam.Container
 			)
 
+			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "pipenv")
+
 			firstImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIPENV_VERSION": buildpackInfo.Metadata.Dependencies[0].Version}).
+				WithEnv(map[string]string{"BP_PIPENV_VERSION": dependencies[0].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			secondImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIPENV_VERSION": buildpackInfo.Metadata.Dependencies[1].Version}).
+				WithEnv(map[string]string{"BP_PIPENV_VERSION": dependencies[1].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -168,7 +172,7 @@ func testLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				`      <unknown>         -> ""`,
 			))
 			Expect(logs).To(ContainLines(
-				fmt.Sprintf(`    Selected Pipenv version (using BP_PIPENV_VERSION): %s`, buildpackInfo.Metadata.Dependencies[1].Version),
+				fmt.Sprintf(`    Selected Pipenv version (using BP_PIPENV_VERSION): %s`, dependencies[1].Version),
 			))
 			Expect(logs).To(ContainLines(
 				"  Executing build process",

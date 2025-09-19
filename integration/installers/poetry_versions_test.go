@@ -15,9 +15,11 @@ import (
 
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
+
+	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
 )
 
-func testVersions(t *testing.T, context spec.G, it spec.S) {
+func poetryTestVersions(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -47,6 +49,9 @@ func testVersions(t *testing.T, context spec.G, it spec.S) {
 
 			containersMap = map[string]interface{}{}
 			imagesMap = map[string]interface{}{}
+
+			source, err = occam.Source(filepath.Join("testdata", "poetry_app"))
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		it.After(func() {
@@ -60,37 +65,36 @@ func testVersions(t *testing.T, context spec.G, it spec.S) {
 			Expect(os.RemoveAll(source)).To(Succeed())
 		})
 
-		it("builds and runs successfully with both provided dependency versions", func() {
+		it("builds and runs successfully with multiple provided dependency versions", func() {
 			var err error
 
-			source, err = occam.Source(filepath.Join("testdata", "default_app"))
-			Expect(err).NotTo(HaveOccurred())
+			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "poetry")
 
-			firstPipenvVersion := buildpackInfo.Metadata.Dependencies[0].Version
-			secondPipenvVersion := buildpackInfo.Metadata.Dependencies[1].Version
+			firstPoetryVersion := dependencies[0].Version
+			secondPoetryVersion := dependencies[1].Version
 
-			Expect(firstPipenvVersion).NotTo(Equal(secondPipenvVersion))
+			Expect(firstPoetryVersion).NotTo(Equal(secondPoetryVersion))
 
 			firstImage, firstLogs, err := pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIPENV_VERSION": firstPipenvVersion}).
+				WithEnv(map[string]string{"BP_POETRY_VERSION": firstPoetryVersion}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), firstLogs.String)
 
 			imagesMap[firstImage.ID] = nil
 
 			Expect(firstLogs).To(ContainLines(
-				ContainSubstring(fmt.Sprintf(`Selected Pipenv version (using BP_PIPENV_VERSION): %s`, firstPipenvVersion)),
+				ContainSubstring(fmt.Sprintf(`Selected Poetry version (using BP_POETRY_VERSION): %s`, firstPoetryVersion)),
 			))
 
 			firstContainer, err := docker.Container.Run.
-				WithCommand("pipenv --version").
+				WithCommand("poetry --version").
 				Execute(firstImage.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -100,28 +104,28 @@ func testVersions(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(firstContainer.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(ContainSubstring(fmt.Sprintf(`pipenv, version %s`, firstPipenvVersion)))
+			}).Should(MatchRegexp(fmt.Sprintf(`Poetry.*version %s`, firstPoetryVersion)))
 
 			secondImage, secondLogs, err := pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython,
-					settings.Buildpacks.Pip,
-					settings.Buildpacks.Pipenv,
-					settings.Buildpacks.BuildPlan,
+					settings.Buildpacks.CPython.Online,
+					settings.Buildpacks.Pip.Online,
+					settings.Buildpacks.PythonInstallers.Online,
+					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIPENV_VERSION": secondPipenvVersion}).
+				WithEnv(map[string]string{"BP_POETRY_VERSION": secondPoetryVersion}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), secondLogs.String)
 
 			imagesMap[secondImage.ID] = nil
 
 			Expect(secondLogs).To(ContainLines(
-				ContainSubstring(fmt.Sprintf(`Selected Pipenv version (using BP_PIPENV_VERSION): %s`, secondPipenvVersion)),
+				ContainSubstring(fmt.Sprintf(`Selected Poetry version (using BP_POETRY_VERSION): %s`, secondPoetryVersion)),
 			))
 
 			secondContainer, err := docker.Container.Run.
-				WithCommand("pipenv --version").
+				WithCommand("poetry --version").
 				Execute(secondImage.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -131,7 +135,7 @@ func testVersions(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(secondContainer.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(ContainSubstring(fmt.Sprintf(`pipenv, version %s`, secondPipenvVersion)))
+			}).Should(MatchRegexp(fmt.Sprintf(`Poetry.*version %s`, secondPoetryVersion)))
 		})
 	})
 }
