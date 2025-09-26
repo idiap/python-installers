@@ -41,7 +41,7 @@ func TestIntegration(t *testing.T) {
 	root, err := filepath.Abs("./../../")
 	Expect(err).NotTo(HaveOccurred())
 
-	file, err := os.Open(filepath.Join(root, "/integration.json"))
+	file, err := os.Open(filepath.Join(root, "integration.json"))
 	Expect(err).NotTo(HaveOccurred())
 
 	err = json.NewDecoder(file).Decode(&settings.Config)
