@@ -8,11 +8,17 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -21,6 +27,7 @@ import (
 	"github.com/joshuatcasey/libdependency/retrieve"
 	"github.com/joshuatcasey/libdependency/upstream"
 	"github.com/joshuatcasey/libdependency/versionology"
+	"github.com/nfx/go-htmltable"
 	"github.com/paketo-buildpacks/packit/v2/cargo"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 )
@@ -46,6 +53,10 @@ func (release PyPiRelease) Version() *semver.Version {
 }
 
 func getAllVersionsForInstaller(installer string) retrieve.GetAllVersionsFunc {
+	if installer == "miniconda3" {
+		return getAllMinicondaVersions
+	}
+
 	return func() (versionology.VersionFetcherArray, error) {
 
 		var pypiMetadata PyPiProductMetadataRaw
@@ -162,6 +173,176 @@ func generatePoetryMetadata(versionFetcher versionology.VersionFetcher) ([]versi
 	}}, nil
 }
 
+type MinicondaRelease struct {
+	version      *semver.Version
+	fullVersion  *semver.Version
+	Arch         string
+	SourceURL    string
+	UploadTime   time.Time
+	SourceSHA256 string
+	BinaryURL    string
+	BinarySHA256 string
+}
+
+func (release MinicondaRelease) Version() *semver.Version {
+	return release.version
+}
+
+func (release MinicondaRelease) FullVersion() *semver.Version {
+	return release.fullVersion
+}
+
+type Miniconda struct {
+	Filename     string `header:"Filename"`
+	Size         int    `header:"Size"`
+	LastModified string `header:"Last Modified"`
+	SHA256       string `header:"SHA256"`
+}
+
+const MaxNumberOfMinicondaReleases = 8
+
+var ArchMap = map[string]string{
+	"x86_64":  "amd64",
+	"aarch64": "arm64",
+}
+
+// filtered returns the slice passed in parameter with the needle removed
+func filtered(haystack []Miniconda, needle *regexp.Regexp) []Miniconda {
+	output := []Miniconda{}
+
+	for _, entry := range haystack {
+		if needle.MatchString(entry.Filename) {
+			output = append(output, entry)
+		}
+	}
+
+	return output
+}
+
+func getAllMinicondaVersions() (versionology.VersionFetcherArray, error) {
+	url := "https://repo.anaconda.com/miniconda"
+	condaInstallersTable, err := htmltable.NewSliceFromURL[Miniconda](url)
+	if err != nil {
+		return nil, err
+	}
+
+	re := regexp.MustCompile(`Miniconda3-py39_(?P<Version>\d+.\d+.\d+(-\d+)?)-Linux-(?P<Arch>x86_64|aarch64)`)
+	matches := filtered(condaInstallersTable, re)
+
+	// Keeping only six most recent versions as otherwise it means spamming the release
+	// page from GitHub for getting the sha256 for the sources which will get throttled
+	kept := matches[:MaxNumberOfMinicondaReleases]
+
+	// var allVersions versionology.VersionFetcherArray
+	// var allVersions []MinicondaRelease
+	filteredVersions := map[string]MinicondaRelease{}
+
+	for _, item := range kept {
+		matches := re.FindStringSubmatch(item.Filename)
+
+		fmt.Printf("Parsing semver version %s\n", matches[1])
+
+		fullVersion, err := semver.NewVersion(matches[1])
+		if err != nil {
+			continue
+		}
+
+		originalVersion := strings.TrimSuffix(matches[1], matches[2])
+		newVersion, err := semver.NewVersion(originalVersion)
+		if err != nil {
+			continue
+		}
+
+		versionString := fmt.Sprintf("%s-%s", newVersion.String(), matches[3])
+		if knownVersion, ok := filteredVersions[versionString]; ok {
+			knownPrerelease, err := strconv.Atoi(knownVersion.FullVersion().Prerelease())
+			if err != nil {
+				return nil, fmt.Errorf("could not parse prerelease value %s: %s", knownVersion.FullVersion().Prerelease(), err)
+			}
+			newPrerelease, err := strconv.Atoi(fullVersion.Prerelease())
+			if err != nil {
+				return nil, fmt.Errorf("could not parse prerelease value %s: %s", fullVersion.Prerelease(), err)
+			}
+
+			if knownPrerelease > newPrerelease {
+				fmt.Println("skip", fullVersion, "as more recent version (", knownVersion.FullVersion(), ") was already found")
+				continue
+			}
+		}
+
+		uploadTime, err := time.Parse(time.DateTime, item.LastModified)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse upload time '%s' as date for version %s: %w", item.LastModified, fullVersion, err)
+		}
+
+		sha256URL := fmt.Sprintf("https://github.com/conda/conda/releases/download/%s/conda-%s.tar.gz.sha256sum", originalVersion, originalVersion)
+		resp, err := http.Get(sha256URL)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		sourceSHA256, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read body of sha256 request")
+		}
+
+		sourceSHA256 = bytes.TrimSpace(sourceSHA256)
+
+		if len(sourceSHA256) != sha256.BlockSize {
+			return nil, fmt.Errorf("source sha256 does not have the correct size: %d vs %d", len(sourceSHA256), sha256.BlockSize)
+		}
+
+		filteredVersions[versionString] = MinicondaRelease{
+			version:      newVersion,
+			fullVersion:  fullVersion,
+			Arch:         ArchMap[matches[3]],
+			BinaryURL:    fmt.Sprintf("%s/%s", url, item.Filename),
+			BinarySHA256: item.SHA256,
+			SourceURL:    fmt.Sprintf("https://github.com/conda/conda/releases/download/%s/conda-%s.tar.gz", originalVersion, originalVersion),
+			SourceSHA256: string(sourceSHA256),
+			UploadTime:   uploadTime,
+		}
+	}
+
+	var result versionology.VersionFetcherArray
+	for _, version := range filteredVersions {
+		result = append(result, version)
+	}
+	return result, nil
+}
+
+func generateMinicondaMetadata(versionFetcher versionology.VersionFetcher) ([]versionology.Dependency, error) {
+	version := versionFetcher.Version().String()
+	minicondaRelease, ok := versionFetcher.(MinicondaRelease)
+	if !ok {
+		return nil, errors.New("expected a MinicondaRelease")
+	}
+
+	var licenseIDsAsInterface []interface{}
+	licenseIDsAsInterface = append(licenseIDsAsInterface, "BSD-3-Clause")
+	configMetadataDependency := cargo.ConfigMetadataDependency{
+		CPE:            fmt.Sprintf("cpe:2.3:a:conda:miniconda3:%s:*:*:*:*:python:*:*", version),
+		Checksum:       fmt.Sprintf("sha256:%s", minicondaRelease.BinarySHA256),
+		ID:             "miniconda3",
+		Licenses:       licenseIDsAsInterface,
+		Name:           "Miniconda3.sh",
+		OS:             "linux",
+		Arch:           minicondaRelease.Arch,
+		PURL:           retrieve.GeneratePURL("miniconda3", version, minicondaRelease.SourceSHA256, minicondaRelease.SourceURL),
+		Source:         minicondaRelease.SourceURL,
+		SourceChecksum: fmt.Sprintf("sha256:%s", minicondaRelease.SourceSHA256),
+		Stacks:         []string{"*"},
+		URI:            minicondaRelease.BinaryURL,
+		Version:        version,
+	}
+
+	return []versionology.Dependency{{
+		ConfigMetadataDependency: configMetadataDependency,
+		SemverVersion:            versionFetcher.Version(),
+	}}, nil
+}
+
 // Taken from libdependency.retrieve.retrieval
 // https://github.com/joshuatcasey/libdependency/blob/main/retrieve/retrieval.go
 func toWorkflowJson(item any) (string, error) {
@@ -199,9 +380,10 @@ func main() {
 	}
 
 	metadataGeneratorMap := map[string]retrieve.GenerateMetadataFunc{
-		"pip":    generatePipMetadata,
-		"pipenv": generatePipenvMetadata,
-		"poetry": generatePoetryMetadata,
+		"pip":        generatePipMetadata,
+		"pipenv":     generatePipenvMetadata,
+		"poetry":     generatePoetryMetadata,
+		"miniconda3": generateMinicondaMetadata,
 	}
 
 	var dependencies []versionology.Dependency

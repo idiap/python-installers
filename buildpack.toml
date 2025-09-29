@@ -54,6 +54,13 @@ api = "0.8"
     stacks = ["*"]
     version = "25.3.1"
 
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "miniconda3"
+    # Using 4 in place of two as the current logic to find new versions does not
+    # take yet into account the arch field.
+    patches = 4
+
   # pip
   [[metadata.dependencies]]
     checksum = "sha256:f9741d6ded6c1f6f8e5333f97d0737dd34d1b25de5a3ed60a8156253dec56464"
