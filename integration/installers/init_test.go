@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -107,9 +106,7 @@ func TestIntegration(t *testing.T) {
 	// pip
 	suite("Pip Default", pipTestDefault, spec.Parallel())
 	suite("Pip LayerReuse", pipTestLayerReuse, spec.Parallel())
-	if strings.Contains(builder.LocalInfo.Stack.ID, "jammy") || strings.Contains(builder.LocalInfo.Stack.ID, "bionic") {
-		suite("Pip Offline", pipTestOffline, spec.Parallel())
-	}
+	suite("Pip Offline", pipTestOffline, spec.Parallel())
 
 	// pipenv
 	suite("Pipenv Default", pipenvTestDefault, spec.Parallel())
