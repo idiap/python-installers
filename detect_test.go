@@ -15,7 +15,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
 
-	// miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
+	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
@@ -70,14 +70,14 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		plans = append(plans, packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{
-				{Name: "conda"},
+				{Name: miniconda.Conda},
 			},
 		},
 		)
 
 		plans = append(plans, packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{
-				{Name: "pipenv"},
+				{Name: pipenv.Pipenv},
 			},
 			Requires: []packit.BuildPlanRequirement{
 				{
