@@ -266,6 +266,64 @@ api = "0.8"
     id = "poetry"
     patches = 2
 
+  # uv
+  [[metadata.dependencies]]
+    arch = "amd64"
+    os = "linux"
+    cpe = "cpe:2.3:a:uv:uv:0.9.21:*:*:*:*:python:*:*"
+    id = "uv"
+    name = "uv"
+    uri = "https://github.com/astral-sh/uv/releases/download/0.9.21/uv-x86_64-unknown-linux-gnu.tar.gz"
+    sha256 = "0a1ab27383c28ef1c041f85cbbc609d8e3752dfb4b238d2ad97b208a52232baf"
+    source = "https://github.com/astral-sh/uv/releases/download/0.9.21/source.tar.gz"
+    sha256_source = "4b0a5505280424dbde3e1c55203c4106f802d5c031a899a9d87e2256bc783cf0"
+    stacks = ["*"]
+    version = "0.9.21"
+
+  [[metadata.dependencies]]
+    arch = "arm64"
+    os = "linux"
+    cpe = "cpe:2.3:a:uv:uv:0.9.21:*:*:*:*:python:*:*"
+    id = "uv"
+    name = "uv"
+    uri = "https://github.com/astral-sh/uv/releases/download/0.9.21/uv-aarch64-unknown-linux-gnu.tar.gz"
+    sha256 = "416984484783a357170c43f98e7d2d203f1fb595d6b3b95131513c53e50986ef"
+    source = "https://github.com/astral-sh/uv/releases/download/0.9.21/source.tar.gz"
+    sha256_source = "4b0a5505280424dbde3e1c55203c4106f802d5c031a899a9d87e2256bc783cf0"
+    stacks = ["*"]
+    version = "0.9.21"
+
+  [[metadata.dependencies]]
+    arch = "amd64"
+    os = "linux"
+    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
+    id = "uv"
+    name = "uv"
+    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-x86_64-unknown-linux-gnu.tar.gz"
+    sha256 = "e170aed70ac0225feee612e855d3a57ae73c61ffb22c7e52c3fd33b87c286508"
+    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
+    sha256_source = "0c683fac23fc414505adce589adf642d710798b691321672de554443b6938c6e"
+    stacks = ["*"]
+    version = "0.9.22"
+
+  [[metadata.dependencies]]
+    arch = "arm64"
+    os = "linux"
+    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
+    id = "uv"
+    name = "uv"
+    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-aarch64-unknown-linux-gnu.tar.gz"
+    sha256 = "2f8716c407d5da21b8a3e8609ed358147216aaab28b96b1d6d7f48e9bcc6254e"
+    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
+    sha256_source = "0c683fac23fc414505adce589adf642d710798b691321672de554443b6938c6e"
+    stacks = ["*"]
+    version = "0.9.22"
+
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "python-uv"
+    patches = 2
+
 [[stacks]]
   id = "*"
 

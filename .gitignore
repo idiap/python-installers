@@ -31,3 +31,4 @@ go.work.sum
 /build
 .idea/
 .DS_Store
+tmp/

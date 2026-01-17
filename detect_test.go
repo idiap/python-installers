@@ -20,6 +20,7 @@ import (
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
+	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 
 	"github.com/sclevine/spec"
 
@@ -126,7 +127,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					WorkingDir: workingDir,
 				})
 
-				plans = append(plans,
+				withPoetry := append(plans,
 					packit.BuildPlan{
 						Provides: []packit.BuildPlanProvision{
 							{Name: "poetry"},
@@ -151,7 +152,31 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				)
 
 				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(pythoninstallers.Or(plans...)))
+				Expect(result.Plan).To(Equal(pythoninstallers.Or(withPoetry...)))
+			})
+		})
+
+		context("with uv.lock", func() {
+			it.Before(func() {
+				Expect(os.WriteFile(filepath.Join(workingDir, uv.LockfileName), []byte{}, os.ModePerm)).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, uv.LockfileName), []byte(`requires-python = "3.13.0"`), 0755)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+
+				withUv := append(plans,
+					packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{
+							{Name: uv.Uv},
+						},
+					},
+				)
+
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(pythoninstallers.Or(withUv...)))
 			})
 		})
 	})

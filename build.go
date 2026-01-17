@@ -13,6 +13,7 @@ import (
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
+	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
 )
@@ -70,6 +71,14 @@ func Build(
 			case poetry.PoetryDependency:
 				result, err := poetry.Build(
 					parameters.(poetry.PoetryBuildParameters),
+					commonBuildParameters,
+				)(context)
+
+				return validateResult(result, err)
+
+			case uv.Uv:
+				result, err := uv.Build(
+					parameters.(uv.UvBuildParameters),
 					commonBuildParameters,
 				)(context)
 
