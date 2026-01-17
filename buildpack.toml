@@ -16,19 +16,24 @@ api = "0.8"
 
 [metadata]
   include-files = [
-    "bin/run",
-    "bin/build",
-    "bin/detect",
+    "linux/amd64/bin/run",
+    "linux/amd64/bin/build",
+    "linux/amd64/bin/detect",
+    "linux/arm64/bin/run",
+    "linux/arm64/bin/build",
+    "linux/arm64/bin/detect",
     "buildpack.toml",
   ]
-  pre-package = "./scripts/build.sh"
+  pre-package = "./scripts/build.sh --target linux/amd64 --target linux/arm64"
 
   # Below are the dependencies of all supported installers
   # miniconda
   [[metadata.dependencies]]
+    arch = "amd64"
     cpe = "cpe:2.3:a:conda:miniconda3:25.3.1:*:*:*:*:python:*:*"
     id = "miniconda3"
     name = "Miniconda.sh"
+    os = "linux"
     uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-x86_64.sh"
     sha256 = "b40682cedf1e1755c02555f8d3d98aadb4607a68da7caf72a9bbe1fb9ae0b904"
     source = "https://github.com/conda/conda/archive/refs/tags/25.3.1.tar.gz"
@@ -36,30 +41,50 @@ api = "0.8"
     stacks = ["*"]
     version = "25.3.1"
 
+  [[metadata.dependencies]]
+    arch = "arm64"
+    cpe = "cpe:2.3:a:conda:miniconda3:25.3.1:*:*:*:*:python:*:*"
+    id = "miniconda3"
+    name = "Miniconda.sh"
+    os = "linux"
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-aarch64.sh"
+    sha256 = "5afee04df06c923462341cfc87727100a67fa854550d0d7a2e6295005168e6b7"
+    source = "https://github.com/conda/conda/archive/refs/tags/25.3.1.tar.gz"
+    sha256_source = "5c6e41275154657189f169cbe02ed23b2fcb53491b457d00f8ca221603b2769b"
+    stacks = ["*"]
+    version = "25.3.1"
+
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "miniconda3"
+    # Using 4 in place of two as the current logic to find new versions does not
+    # take yet into account the arch field.
+    patches = 4
+
   # pip
   [[metadata.dependencies]]
-    checksum = "sha256:e100bda0c7e0dd20c6a471dbddb027698c3a96263fe7c0d5c196953eb8e82281"
-    cpe = "cpe:2.3:a:pypa:pip:24.1.2:*:*:*:*:python:*:*"
+    checksum = "sha256:6b54fb994ca5a8fe7df5d671495f480f927ed202aca6766e963eb255f58342e8"
+    cpe = "cpe:2.3:a:pypa:pip:25.2.0:*:*:*:*:python:*:*"
     id = "pip"
     licenses = ["MIT"]
-    purl = "pkg:generic/pip@24.1.2?checksum=e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff&download_url=https://files.pythonhosted.org/packages/12/3d/d899257cace386bebb7bdf8a872d5fe3b935cc6381c3ddb76d3e5d99890d/pip-24.1.2.tar.gz"
-    source = "https://files.pythonhosted.org/packages/12/3d/d899257cace386bebb7bdf8a872d5fe3b935cc6381c3ddb76d3e5d99890d/pip-24.1.2.tar.gz"
-    source-checksum = "sha256:e5458a0b89f2755e0ee8c0c77613fe5273e05f337907874d64f13171a898a7ff"
+    purl = "pkg:generic/pip@25.2.0?checksum=578283f006390f85bb6282dffb876454593d637f5d1be494b5202ce4877e71f2&download_url=https://files.pythonhosted.org/packages/20/16/650289cd3f43d5a2fadfd98c68bd1e1e7f2550a1a5326768cddfbcedb2c5/pip-25.2.tar.gz"
+    source = "https://files.pythonhosted.org/packages/20/16/650289cd3f43d5a2fadfd98c68bd1e1e7f2550a1a5326768cddfbcedb2c5/pip-25.2.tar.gz"
+    source-checksum = "sha256:578283f006390f85bb6282dffb876454593d637f5d1be494b5202ce4877e71f2"
     stacks = ["*"]
-    uri = "https://artifacts.paketo.io/pip/pip_24.1.2_noarch_e100bda0.tgz"
-    version = "24.1.2"
+    uri = "https://artifacts.paketo.io/pip/pip_25.2.0_noarch_6b54fb99.tgz"
+    version = "25.2.0"
 
   [[metadata.dependencies]]
-    checksum = "sha256:822dd89d0c3f68bd59e89afaf1e486829b010c2fb05e8c1e9f8b3fb1d4053206"
-    cpe = "cpe:2.3:a:pypa:pip:24.2.0:*:*:*:*:python:*:*"
+    checksum = "sha256:7e9f0cbb422874c7b95b8a29ce3895e14c298a053b461cfe12a3d69578e15bfc"
+    cpe = "cpe:2.3:a:pypa:pip:25.3.0:*:*:*:*:python:*:*"
     id = "pip"
     licenses = ["MIT"]
-    purl = "pkg:generic/pip@24.2.0?checksum=5b5e490b5e9cb275c879595064adce9ebd31b854e3e803740b72f9ccf34a45b8&download_url=https://files.pythonhosted.org/packages/4d/87/fb90046e096a03aeab235e139436b3fe804cdd447ed2093b0d70eba3f7f8/pip-24.2.tar.gz"
-    source = "https://files.pythonhosted.org/packages/4d/87/fb90046e096a03aeab235e139436b3fe804cdd447ed2093b0d70eba3f7f8/pip-24.2.tar.gz"
-    source-checksum = "sha256:5b5e490b5e9cb275c879595064adce9ebd31b854e3e803740b72f9ccf34a45b8"
+    purl = "pkg:generic/pip@25.3.0?checksum=8d0538dbbd7babbd207f261ed969c65de439f6bc9e5dbd3b3b9a77f25d95f343&download_url=https://files.pythonhosted.org/packages/fe/6e/74a3f0179a4a73a53d66ce57fdb4de0080a8baa1de0063de206d6167acc2/pip-25.3.tar.gz"
+    source = "https://files.pythonhosted.org/packages/fe/6e/74a3f0179a4a73a53d66ce57fdb4de0080a8baa1de0063de206d6167acc2/pip-25.3.tar.gz"
+    source-checksum = "sha256:8d0538dbbd7babbd207f261ed969c65de439f6bc9e5dbd3b3b9a77f25d95f343"
     stacks = ["*"]
-    uri = "https://artifacts.paketo.io/pip/pip_24.2.0_noarch_822dd89d.tgz"
-    version = "24.2.0"
+    uri = "https://artifacts.paketo.io/pip/pip_25.3.0_noarch_7e9f0cbb.tgz"
+    version = "25.3.0"
 
   [[metadata.dependency-constraints]]
     constraint = "*"
@@ -68,30 +93,30 @@ api = "0.8"
 
   # pipenv
   [[metadata.dependencies]]
-    checksum = "sha256:e5ed842dc69b601da6fe26aee8677da608ec9df0f3f98c25442fdade5f1114ac"
-    cpe = "cpe:2.3:a:python-pipenv:pipenv:2024.0.0:*:*:*:*:python:*:*"
+    checksum = "sha256:f0a67aa928824e61003d52acea72a94b180800019f03d38a311966f6330bc8d1"
+    cpe = "cpe:2.3:a:python-pipenv:pipenv:2025.0.3:*:*:*:*:python:*:*"
     id = "pipenv"
     licenses = ["MIT", "MIT-0"]
     name = "Pipenv"
-    purl = "pkg:generic/pipenv@2024.0.0?checksum=e5ed842dc69b601da6fe26aee8677da608ec9df0f3f98c25442fdade5f1114ac&download_url=https://files.pythonhosted.org/packages/0f/e5/e6b5e40a553f453c890b0253f559608cc0af1b7ae0e295095304061c699f/pipenv-2024.0.0.tar.gz"
-    source = "https://files.pythonhosted.org/packages/0f/e5/e6b5e40a553f453c890b0253f559608cc0af1b7ae0e295095304061c699f/pipenv-2024.0.0.tar.gz"
-    source-checksum = "sha256:e5ed842dc69b601da6fe26aee8677da608ec9df0f3f98c25442fdade5f1114ac"
+    purl = "pkg:generic/pipenv@2025.0.3?checksum=f0a67aa928824e61003d52acea72a94b180800019f03d38a311966f6330bc8d1&download_url=https://files.pythonhosted.org/packages/59/ca/397e375554481d70356d29890d44398aec3b52a0484b32a7e25c487ee81e/pipenv-2025.0.3.tar.gz"
+    source = "https://files.pythonhosted.org/packages/59/ca/397e375554481d70356d29890d44398aec3b52a0484b32a7e25c487ee81e/pipenv-2025.0.3.tar.gz"
+    source-checksum = "sha256:f0a67aa928824e61003d52acea72a94b180800019f03d38a311966f6330bc8d1"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/0f/e5/e6b5e40a553f453c890b0253f559608cc0af1b7ae0e295095304061c699f/pipenv-2024.0.0.tar.gz"
-    version = "2024.0.0"
+    uri = "https://files.pythonhosted.org/packages/59/ca/397e375554481d70356d29890d44398aec3b52a0484b32a7e25c487ee81e/pipenv-2025.0.3.tar.gz"
+    version = "2025.0.3"
 
   [[metadata.dependencies]]
-    checksum = "sha256:ae5a83fa5b66065cebd2bd8f73f0b281b3bd202a13d58cc644f0b9765128c990"
-    cpe = "cpe:2.3:a:python-pipenv:pipenv:2024.0.1:*:*:*:*:python:*:*"
+    checksum = "sha256:36fc2a7841ccdb2f58a9f787b296c2e15dea3b5b79b84d4071812f28b7e8d7a2"
+    cpe = "cpe:2.3:a:python-pipenv:pipenv:2025.0.4:*:*:*:*:python:*:*"
     id = "pipenv"
     licenses = ["MIT", "MIT-0"]
     name = "Pipenv"
-    purl = "pkg:generic/pipenv@2024.0.1?checksum=ae5a83fa5b66065cebd2bd8f73f0b281b3bd202a13d58cc644f0b9765128c990&download_url=https://files.pythonhosted.org/packages/d1/67/c29cb9081e5648b754b7ec95482e348b4d616681a3f0ee402ca082b9be02/pipenv-2024.0.1.tar.gz"
-    source = "https://files.pythonhosted.org/packages/d1/67/c29cb9081e5648b754b7ec95482e348b4d616681a3f0ee402ca082b9be02/pipenv-2024.0.1.tar.gz"
-    source-checksum = "sha256:ae5a83fa5b66065cebd2bd8f73f0b281b3bd202a13d58cc644f0b9765128c990"
+    purl = "pkg:generic/pipenv@2025.0.4?checksum=36fc2a7841ccdb2f58a9f787b296c2e15dea3b5b79b84d4071812f28b7e8d7a2&download_url=https://files.pythonhosted.org/packages/3b/15/4c869c2ec2819f8e6529cc26a044c9f7c714246c972b9b2cbbafda0847f9/pipenv-2025.0.4.tar.gz"
+    source = "https://files.pythonhosted.org/packages/3b/15/4c869c2ec2819f8e6529cc26a044c9f7c714246c972b9b2cbbafda0847f9/pipenv-2025.0.4.tar.gz"
+    source-checksum = "sha256:36fc2a7841ccdb2f58a9f787b296c2e15dea3b5b79b84d4071812f28b7e8d7a2"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/d1/67/c29cb9081e5648b754b7ec95482e348b4d616681a3f0ee402ca082b9be02/pipenv-2024.0.1.tar.gz"
-    version = "2024.0.1"
+    uri = "https://files.pythonhosted.org/packages/3b/15/4c869c2ec2819f8e6529cc26a044c9f7c714246c972b9b2cbbafda0847f9/pipenv-2025.0.4.tar.gz"
+    version = "2025.0.4"
 
   [[metadata.dependency-constraints]]
     constraint = "*"
@@ -124,32 +149,6 @@ api = "0.8"
     stacks = ["*"]
     uri = "https://files.pythonhosted.org/packages/bb/cf/cfdd5ab997bdb51a29c5f1d1925c409c58d5e504062c105dc0d82ec9e7c5/poetry-1.7.1.tar.gz"
     version = "1.7.1"
-
-  [[metadata.dependencies]]
-    checksum = "sha256:49cceb3838104647c3e1021f3a4f13c6053704cc18d33f849a90fe687a29cb73"
-    cpe = "cpe:2.3:a:python-poetry:poetry:1.8.2:*:*:*:*:python:*:*"
-    id = "poetry"
-    licenses = ["MIT"]
-    name = "Poetry"
-    purl = "pkg:generic/poetry@1.8.2?checksum=49cceb3838104647c3e1021f3a4f13c6053704cc18d33f849a90fe687a29cb73&download_url=https://files.pythonhosted.org/packages/49/a7/f5fbce21ed8e5871c229864e9c2b588897e1aeb9431f024636252069245b/poetry-1.8.2.tar.gz"
-    source = "https://files.pythonhosted.org/packages/49/a7/f5fbce21ed8e5871c229864e9c2b588897e1aeb9431f024636252069245b/poetry-1.8.2.tar.gz"
-    source-checksum = "sha256:49cceb3838104647c3e1021f3a4f13c6053704cc18d33f849a90fe687a29cb73"
-    stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/49/a7/f5fbce21ed8e5871c229864e9c2b588897e1aeb9431f024636252069245b/poetry-1.8.2.tar.gz"
-    version = "1.8.2"
-
-  [[metadata.dependencies]]
-    checksum = "sha256:67f4eb68288eab41e841cc71a00d26cf6bdda9533022d0189a145a34d0a35f48"
-    cpe = "cpe:2.3:a:python-poetry:poetry:1.8.3:*:*:*:*:python:*:*"
-    id = "poetry"
-    licenses = ["MIT"]
-    name = "Poetry"
-    purl = "pkg:generic/poetry@1.8.3?checksum=67f4eb68288eab41e841cc71a00d26cf6bdda9533022d0189a145a34d0a35f48&download_url=https://files.pythonhosted.org/packages/07/c7/41108195c39ac1010054ef6b3b445894cee79e8ec73f086b73da94a01901/poetry-1.8.3.tar.gz"
-    source = "https://files.pythonhosted.org/packages/07/c7/41108195c39ac1010054ef6b3b445894cee79e8ec73f086b73da94a01901/poetry-1.8.3.tar.gz"
-    source-checksum = "sha256:67f4eb68288eab41e841cc71a00d26cf6bdda9533022d0189a145a34d0a35f48"
-    stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/07/c7/41108195c39ac1010054ef6b3b445894cee79e8ec73f086b73da94a01901/poetry-1.8.3.tar.gz"
-    version = "1.8.3"
 
   [[metadata.dependencies]]
     checksum = "sha256:5490f8da66d17eecd660e091281f8aaa5554381644540291817c249872c99202"
@@ -204,43 +203,43 @@ api = "0.8"
     version = "2.0.1"
 
   [[metadata.dependencies]]
-    checksum = "sha256:fe86f70f06f307db9ceb093b66bb85f1391f078eec1b5eda0f52e78541d17105"
-    cpe = "cpe:2.3:a:python-poetry:poetry:2.1.0:*:*:*:*:python:*:*"
+    checksum = "sha256:f2c9bd6790b19475976d88ea4553bcc3533c0dc73f740edc4fffe9e2add50594"
+    cpe = "cpe:2.3:a:python-poetry:poetry:2.1.3:*:*:*:*:python:*:*"
     id = "poetry"
     licenses = ["MIT"]
     name = "Poetry"
-    purl = "pkg:generic/poetry@2.0.1?checksum=fe86f70f06f307db9ceb093b66bb85f1391f078eec1b5eda0f52e78541d17105&download_url=https://files.pythonhosted.org/packages/fb/9d/242fc15689320b11f91b0b54cd09a27809043e397f116fa9ec51e9ef963b/poetry-2.1.0.tar.gz"
-    source = "https://files.pythonhosted.org/packages/fb/9d/242fc15689320b11f91b0b54cd09a27809043e397f116fa9ec51e9ef963b/poetry-2.1.0.tar.gz"
-    source-checksum = "sha256:fe86f70f06f307db9ceb093b66bb85f1391f078eec1b5eda0f52e78541d17105"
+    purl = "pkg:generic/poetry@2.1.3?checksum=f2c9bd6790b19475976d88ea4553bcc3533c0dc73f740edc4fffe9e2add50594&download_url=https://files.pythonhosted.org/packages/db/12/1c8d8b2c6017a33a9c9c708c6d2bb883af7f447520a466dc21d2c74ecfe1/poetry-2.1.3.tar.gz"
+    source = "https://files.pythonhosted.org/packages/db/12/1c8d8b2c6017a33a9c9c708c6d2bb883af7f447520a466dc21d2c74ecfe1/poetry-2.1.3.tar.gz"
+    source-checksum = "sha256:f2c9bd6790b19475976d88ea4553bcc3533c0dc73f740edc4fffe9e2add50594"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/fb/9d/242fc15689320b11f91b0b54cd09a27809043e397f116fa9ec51e9ef963b/poetry-2.1.0.tar.gz"
-    version = "2.1.0"
+    uri = "https://files.pythonhosted.org/packages/db/12/1c8d8b2c6017a33a9c9c708c6d2bb883af7f447520a466dc21d2c74ecfe1/poetry-2.1.3.tar.gz"
+    version = "2.1.3"
 
   [[metadata.dependencies]]
-    checksum = "sha256:d82673865bf13d6cd0dacf28c69a89670456d8df2f9e5da82bfb5f833ba00efc"
-    cpe = "cpe:2.3:a:python-poetry:poetry:2.1.1:*:*:*:*:python:*:*"
+    checksum = "sha256:bed4af5fc87fb145258ac5b1dae77de2cd7082ec494e3b2f66bca0f477cbfc5c"
+    cpe = "cpe:2.3:a:python-poetry:poetry:2.1.4:*:*:*:*:python:*:*"
     id = "poetry"
     licenses = ["MIT"]
     name = "Poetry"
-    purl = "pkg:generic/poetry@2.1.1?checksum=d82673865bf13d6cd0dacf28c69a89670456d8df2f9e5da82bfb5f833ba00efc&download_url=https://files.pythonhosted.org/packages/a9/69/fbcaa6e878a9e8a9ab86222637f6058b1e611f416c402475b5c9a9dcbca6/poetry-2.1.1.tar.gz"
-    source = "https://files.pythonhosted.org/packages/a9/69/fbcaa6e878a9e8a9ab86222637f6058b1e611f416c402475b5c9a9dcbca6/poetry-2.1.1.tar.gz"
-    source-checksum = "sha256:d82673865bf13d6cd0dacf28c69a89670456d8df2f9e5da82bfb5f833ba00efc"
+    purl = "pkg:generic/poetry@2.1.4?checksum=bed4af5fc87fb145258ac5b1dae77de2cd7082ec494e3b2f66bca0f477cbfc5c&download_url=https://files.pythonhosted.org/packages/4e/f3/d7f0fcefd3577d01574bbc43b0e93b00fec529b9dc14f838dc4502670a08/poetry-2.1.4.tar.gz"
+    source = "https://files.pythonhosted.org/packages/4e/f3/d7f0fcefd3577d01574bbc43b0e93b00fec529b9dc14f838dc4502670a08/poetry-2.1.4.tar.gz"
+    source-checksum = "sha256:bed4af5fc87fb145258ac5b1dae77de2cd7082ec494e3b2f66bca0f477cbfc5c"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/a9/69/fbcaa6e878a9e8a9ab86222637f6058b1e611f416c402475b5c9a9dcbca6/poetry-2.1.1.tar.gz"
-    version = "2.1.1"
+    uri = "https://files.pythonhosted.org/packages/4e/f3/d7f0fcefd3577d01574bbc43b0e93b00fec529b9dc14f838dc4502670a08/poetry-2.1.4.tar.gz"
+    version = "2.1.4"
 
   [[metadata.dependencies]]
-    checksum = "sha256:6a0694645ee24ba93cb94254db66e47971344562ddd5578e82bf35e572bc546d"
-    cpe = "cpe:2.3:a:python-poetry:poetry:2.1.2:*:*:*:*:python:*:*"
+    checksum = "sha256:c6bc7e9d2d5aad4f6818cc5eef1f85fcfb7ee49a1aab3b4ff66d0c6874e74769"
+    cpe = "cpe:2.3:a:python-poetry:poetry:2.2.0:*:*:*:*:python:*:*"
     id = "poetry"
     licenses = ["MIT"]
     name = "Poetry"
-    purl = "pkg:generic/poetry@2.1.2?checksum=6a0694645ee24ba93cb94254db66e47971344562ddd5578e82bf35e572bc546d&download_url=https://files.pythonhosted.org/packages/7e/96/187b538742df11fe32beca5c146d9522b1fd9f42897f0772ff8dfc04972f/poetry-2.1.2.tar.gz"
-    source = "https://files.pythonhosted.org/packages/7e/96/187b538742df11fe32beca5c146d9522b1fd9f42897f0772ff8dfc04972f/poetry-2.1.2.tar.gz"
-    source-checksum = "sha256:6a0694645ee24ba93cb94254db66e47971344562ddd5578e82bf35e572bc546d"
+    purl = "pkg:generic/poetry@2.2.0?checksum=c6bc7e9d2d5aad4f6818cc5eef1f85fcfb7ee49a1aab3b4ff66d0c6874e74769&download_url=https://files.pythonhosted.org/packages/57/a6/28b83bb81911dc5b2a6a2be4006cceb29b0915b2f62d2e44192e315c2456/poetry-2.2.0.tar.gz"
+    source = "https://files.pythonhosted.org/packages/57/a6/28b83bb81911dc5b2a6a2be4006cceb29b0915b2f62d2e44192e315c2456/poetry-2.2.0.tar.gz"
+    source-checksum = "sha256:c6bc7e9d2d5aad4f6818cc5eef1f85fcfb7ee49a1aab3b4ff66d0c6874e74769"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/7e/96/187b538742df11fe32beca5c146d9522b1fd9f42897f0772ff8dfc04972f/poetry-2.1.2.tar.gz"
-    version = "2.1.2"
+    uri = "https://files.pythonhosted.org/packages/57/a6/28b83bb81911dc5b2a6a2be4006cceb29b0915b2f62d2e44192e315c2456/poetry-2.2.0.tar.gz"
+    version = "2.2.0"
 
   [[metadata.dependency-constraints]]
     constraint = "1.7.*"
@@ -257,5 +256,23 @@ api = "0.8"
     id = "poetry"
     patches = 2
 
+  [[metadata.dependency-constraints]]
+    constraint = "2.1.*"
+    id = "poetry"
+    patches = 2
+
+  [[metadata.dependency-constraints]]
+    constraint = "2.2.*"
+    id = "poetry"
+    patches = 2
+
 [[stacks]]
   id = "*"
+
+[[targets]]
+  arch = "amd64"
+  os = "linux"
+
+[[targets]]
+  arch = "arm64"
+  os = "linux"

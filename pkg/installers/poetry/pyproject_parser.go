@@ -5,6 +5,8 @@
 package poetry
 
 import (
+	"strings"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -15,6 +17,9 @@ type PyProjectToml struct {
 				Python string
 			}
 		}
+	}
+	Project struct {
+		RequiresPython string `toml:"requires-python"`
 	}
 }
 
@@ -33,5 +38,8 @@ func (p PyProjectParser) ParsePythonVersion(pyProjectToml string) (string, error
 		return "", err
 	}
 
-	return pyProject.Tool.Poetry.Dependencies.Python, nil
+	if pyProject.Project.RequiresPython != "" {
+		return strings.Trim(pyProject.Project.RequiresPython, "="), nil
+	}
+	return strings.Trim(pyProject.Tool.Poetry.Dependencies.Python, "="), nil
 }

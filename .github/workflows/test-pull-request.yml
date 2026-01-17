@@ -13,19 +13,21 @@ concurrency:
 jobs:
   unit:
     name: Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       builders: ${{ steps.builders.outputs.builders }}
     steps:
-    - name: Setup Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 'stable'
-
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
+
+    - name: Setup Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
 
     - name: Run Unit Tests
+      env:
+        GO_TEST_PARAMS: -count=5
       run: ./scripts/unit.sh
 
     - name: Get builders from integration.json
@@ -39,43 +41,43 @@ jobs:
 
   integration:
     name: Integration Tests with Builders
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: unit
     strategy:
       matrix:
         builder: ${{ fromJSON(needs.unit.outputs.builders) }}
       fail-fast: false  # don't cancel all test jobs when one fails
     steps:
-    - name: Free Disk Space (Ubuntu)
-      uses: jlumbroso/free-disk-space@main
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Free Disk Space
+      if: vars.RECLAIM_DISK_SPACE == 'true'
+      uses: paketo-buildpacks/github-config/actions/pull-request/reclaim-disk-space@main
       with:
-        # This might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
         tool-cache: false
-        # Default settings from documentation
         android: true
         dotnet: true
         haskell: true
-        large-packages: true
+        large-packages: false
         docker-images: true
         swap-storage: true
-    - name: Setup Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 'stable'
 
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Setup Go
+      uses: actions/setup-go@v6
+      with:
+        go-version-file: go.mod
 
     - name: Run Integration Tests
       run: ./scripts/integration.sh --builder ${{ matrix.builder }} --token ${{ github.token }}
       env:
         TMPDIR: "${{ runner.temp }}"
+        GIT_TOKEN: ${{ github.token }}
 
   roundup:
     name: Integration Tests
     if: ${{ always() }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: integration
     steps:
     - run: |
@@ -90,10 +92,10 @@ jobs:
 
   upload:
     name: Upload Workflow Event Payload
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Upload Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: event-payload
         path: ${{ github.event_path }}
