@@ -85,7 +85,7 @@ func uvTestDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				"  Executing build process",
 				MatchRegexp(`    Installing uv \d+\.\d+\.\d+`),
-				MatchRegexp(`      Completed in \d+\.\d+`),
+				MatchRegexp(`      Completed in \d+(\.?\d+)*`),
 			))
 
 			container, err = docker.Container.Run.

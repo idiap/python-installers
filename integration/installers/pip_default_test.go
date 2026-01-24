@@ -86,7 +86,7 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 			Expect(logs).To(ContainLines(
 				"  Executing build process",
 				MatchRegexp(`    Installing Pip \d+\.\d+\.\d+`),
-				MatchRegexp(`      Completed in \d+\.\d+`),
+				MatchRegexp(`      Completed in \d+(\.?\d+)*`),
 			))
 			Expect(logs).To(ContainLines(
 				"  Configuring build environment",
