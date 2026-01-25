@@ -9,6 +9,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
@@ -23,6 +24,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/google/go-github/v81/github"
 	"github.com/joshuatcasey/libdependency/buildpack_config"
 	"github.com/joshuatcasey/libdependency/retrieve"
 	"github.com/joshuatcasey/libdependency/upstream"
@@ -55,6 +57,10 @@ func (release PyPiRelease) Version() *semver.Version {
 func getAllVersionsForInstaller(installer string) retrieve.GetAllVersionsFunc {
 	if installer == "miniconda3" {
 		return getAllMinicondaVersions
+	}
+
+	if installer == "uv" {
+		return getAllUvVersions
 	}
 
 	return func() (versionology.VersionFetcherArray, error) {
@@ -343,6 +349,107 @@ func generateMinicondaMetadata(versionFetcher versionology.VersionFetcher) ([]ve
 	}}, nil
 }
 
+type UvRelease struct {
+	version      *semver.Version
+	Arch         string
+	SourceURL    string
+	UploadTime   time.Time
+	SourceSHA256 string
+	BinaryURL    string
+	BinarySHA256 string
+}
+
+func (release UvRelease) Version() *semver.Version {
+	return release.version
+}
+
+func getAllUvVersions() (versionology.VersionFetcherArray, error) {
+	client := github.NewClient(nil)
+
+	opt := &github.ListOptions{Page: 1, PerPage: 2}
+	releases, _, err := client.Repositories.ListReleases(context.Background(), "astral-sh", "uv", opt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result versionology.VersionFetcherArray
+
+	for _, release := range releases {
+		version, err := semver.NewVersion(*release.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		var sourceURL *string
+		var sourceSHA256 *string
+		for _, asset := range release.Assets {
+			if *asset.Name == "source.tar.gz" {
+				sourceURL = asset.BrowserDownloadURL
+				sourceSHA256 = asset.Digest
+				break
+			}
+		}
+		if sourceURL == nil || sourceSHA256 == nil {
+			return nil, errors.New("Failed to find source asset")
+		}
+
+		archAsset := "uv-%s-unknown-linux-gnu.tar.gz"
+
+		for inArch, outArch := range ArchMap {
+			assetName := fmt.Sprintf(archAsset, inArch)
+			for _, asset := range release.Assets {
+				if *asset.Name == assetName {
+					result = append(result,
+						UvRelease{
+							version:      version,
+							Arch:         outArch,
+							BinaryURL:    *asset.BrowserDownloadURL,
+							BinarySHA256: *asset.Digest,
+							SourceURL:    *sourceURL,
+							SourceSHA256: *sourceSHA256,
+							UploadTime:   *asset.UpdatedAt.GetTime(),
+						})
+					break
+				}
+			}
+		}
+	}
+
+	return result, nil
+}
+
+func generateUvMetadata(versionFetcher versionology.VersionFetcher) ([]versionology.Dependency, error) {
+	version := versionFetcher.Version().String()
+	uvRelease, ok := versionFetcher.(UvRelease)
+	if !ok {
+		return nil, errors.New("expected a UvRelease")
+	}
+
+	var licenseIDsAsInterface []interface{}
+	licenseIDsAsInterface = append(licenseIDsAsInterface, "Apache-2.0", "MIT")
+	configMetadataDependency := cargo.ConfigMetadataDependency{
+		CPE:            fmt.Sprintf("cpe:2.3:a:uv:uv:%s:*:*:*:*:python:*:*", version),
+		Checksum:       uvRelease.BinarySHA256,
+		ID:             "uv",
+		Licenses:       licenseIDsAsInterface,
+		Name:           "uv",
+		OS:             "linux",
+		Arch:           uvRelease.Arch,
+		PURL:           retrieve.GeneratePURL("uv", version, uvRelease.SourceSHA256, uvRelease.SourceURL),
+		Source:         uvRelease.SourceURL,
+		SourceChecksum: uvRelease.SourceSHA256,
+		Stacks:         []string{"*"},
+		URI:            uvRelease.BinaryURL,
+		Version:        version,
+	}
+
+	return []versionology.Dependency{{
+		ConfigMetadataDependency: configMetadataDependency,
+		SemverVersion:            versionFetcher.Version(),
+	}}, nil
+}
+
 // Taken from libdependency.retrieve.retrieval
 // https://github.com/joshuatcasey/libdependency/blob/main/retrieve/retrieval.go
 func toWorkflowJson(item any) (string, error) {
@@ -384,6 +491,7 @@ func main() {
 		"pipenv":     generatePipenvMetadata,
 		"poetry":     generatePoetryMetadata,
 		"miniconda3": generateMinicondaMetadata,
+		"uv":         generateUvMetadata,
 	}
 
 	var dependencies []versionology.Dependency

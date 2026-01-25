@@ -13,6 +13,7 @@ import (
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
+	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 )
 
 // Detect will return a packit.DetectFunc that will be invoked during the
@@ -52,6 +53,14 @@ func Detect(logger scribe.Emitter, pyprojectVersionParser poetry.PyProjectPython
 
 		if err == nil {
 			plans = append(plans, poetryResult.Plan)
+		} else {
+			logger.Detail("%s", err)
+		}
+
+		uvResult, err := uv.Detect()(context)
+
+		if err == nil {
+			plans = append(plans, uvResult.Plan)
 		} else {
 			logger.Detail("%s", err)
 		}

@@ -18,7 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 )
 
-func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
+func uvTestDefault(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -33,7 +33,7 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 
 		var err error
-		source, err = occam.Source(filepath.Join("testdata", "pip_app"))
+		source, err = occam.Source(filepath.Join("testdata", "uv_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -67,7 +67,6 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
-					settings.Buildpacks.CPython.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -76,31 +75,21 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Resolving Pip version",
+				"  Resolving uv version",
 				"    Candidate version sources (in priority order):",
 				"      <unknown> -> \"\"",
 			))
 			Expect(logs).To(ContainLines(
-				MatchRegexp(`    Selected Pip version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected uv version \(using <unknown>\): \d+\.\d+\.\d+`),
 			))
 			Expect(logs).To(ContainLines(
 				"  Executing build process",
-				MatchRegexp(`    Installing Pip \d+\.\d+\.\d+`),
+				MatchRegexp(`    Installing uv \d+\.\d+\.\d+`),
 				MatchRegexp(`      Completed in \d+(\.?\d+)*`),
-			))
-			Expect(logs).To(ContainLines(
-				"  Configuring build environment",
-				MatchRegexp(fmt.Sprintf(`    PIP_FIND_LINKS -> "\$PIP_FIND_LINKS \/layers\/%s\/pip-source"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
-				"",
-				"  Configuring build environment",
-				MatchRegexp(fmt.Sprintf(`    PYTHONPATH -> "\/layers\/%s\/pip\/lib\/python\d+\.\d+\/site-packages:\$PYTHONPATH"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
-				"",
-				"  Configuring launch environment",
-				MatchRegexp(fmt.Sprintf(`    PYTHONPATH -> "\/layers\/%s\/pip\/lib\/python\d+\.\d+\/site-packages:\$PYTHONPATH"`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))),
 			))
 
 			container, err = docker.Container.Run.
-				WithCommand("pip --version").
+				WithCommand("uv --version").
 				Execute(image.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -108,8 +97,7 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(container.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-				// pip versions are not always x.y.z. E.g. 21.3
-			}).Should(MatchRegexp(fmt.Sprintf(`pip \d+\.\d+(\.\d+)? from /layers/%s/pip/lib/python\d+.\d+/site-packages/pip`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))))
+			}).Should(MatchRegexp(`uv \d+\.\d+(\.\d+)?.*`))
 		})
 
 		context("validating SBOM", func() {
@@ -136,7 +124,6 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 				image, logs, err = pack.WithNoColor().Build.
 					WithPullPolicy("never").
 					WithBuildpacks(
-						settings.Buildpacks.CPython.Online,
 						settings.Buildpacks.PythonInstallers.Online,
 						settings.Buildpacks.BuildPlan.Online,
 					).
@@ -148,7 +135,7 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 				Expect(err).ToNot(HaveOccurred(), logs.String)
 
 				container, err = docker.Container.Run.
-					WithCommand("pip --version").
+					WithCommand("uv --version").
 					Execute(image.ID)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -156,11 +143,10 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 					cLogs, err := docker.Container.Logs.Execute(container.ID)
 					Expect(err).NotTo(HaveOccurred())
 					return cLogs.String()
-					// pip versions are not always x.y.z. E.g. 21.3
-				}).Should(MatchRegexp(fmt.Sprintf(`pip \d+\.\d+(\.\d+)? from /layers/%s/pip/lib/python\d+.\d+/site-packages/pip`, strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"))))
+				}).Should(MatchRegexp(`uv \d+\.\d+(\.\d+)?.*`))
 
 				Expect(logs).To(ContainLines(
-					fmt.Sprintf("  Generating SBOM for /layers/%s/pip", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
+					fmt.Sprintf("  Generating SBOM for /layers/%s/uv", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
 					MatchRegexp(`      Completed in \d+(\.?\d+)*`),
 				))
 				Expect(logs).To(ContainLines(
@@ -180,17 +166,17 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 					cLogs, err := docker.Container.Logs.Execute(container2.ID)
 					Expect(err).NotTo(HaveOccurred())
 					return cLogs.String()
-				}).Should(ContainSubstring(`"name":"Pip"`))
+				}).Should(ContainSubstring(`"name":"uv"`))
 
 				// check that all required SBOM files are present
-				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "pip", "sbom.cdx.json")).To(BeARegularFile())
-				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "pip", "sbom.spdx.json")).To(BeARegularFile())
-				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "pip", "sbom.syft.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "uv", "sbom.cdx.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "uv", "sbom.spdx.json")).To(BeARegularFile())
+				Expect(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "uv", "sbom.syft.json")).To(BeARegularFile())
 
 				// check an SBOM file to make sure it has an entry for cpython
-				contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "pip", "sbom.cdx.json"))
+				contents, err := os.ReadFile(filepath.Join(sbomDir, "sbom", "launch", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_"), "uv", "sbom.cdx.json"))
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(contents)).To(ContainSubstring(`"name": "Pip"`))
+				Expect(string(contents)).To(ContainSubstring(`"name": "uv"`))
 			})
 		})
 	})

@@ -7,6 +7,7 @@ replace github.com/ekzhu/minhash-lsh => github.com/ekzhu/minhash-lsh v0.0.0-2017
 
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/google/go-github/v81 v81.0.0
 	github.com/joshuatcasey/libdependency v0.22.0
 	github.com/nfx/go-htmltable v0.4.0
 	github.com/paketo-buildpacks/packit/v2 v2.25.0
@@ -29,6 +30,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/go-git/go-git/v5 v5.16.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hhatto/gorst v0.0.0-20181029133204-ca9f730cac5b // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jdkato/prose v1.2.1 // indirect

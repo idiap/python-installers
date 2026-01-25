@@ -31,6 +31,8 @@ import (
 	pipenvfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv/fakes"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
+	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
+	uvfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/uv/fakes"
 
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
@@ -76,6 +78,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		poetryDependencyManager  *poetryfakes.DependencyManager
 		poetryProcess            *poetryfakes.InstallProcess
 		poetrySitePackageProcess *poetryfakes.SitePackageProcess
+
+		// uv
+		uvDependencyManager *uvfakes.DependencyManager
+		uvInstallProcess    *uvfakes.InstallProcess
 
 		buildParameters pkgcommon.CommonBuildParameters
 
@@ -217,6 +223,34 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		poetrySitePackageProcess = &poetryfakes.SitePackageProcess{}
 		poetrySitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "poetry", "lib", "python3.8", "site-packages")
 
+		// uv
+		uvDependencyManager = &uvfakes.DependencyManager{}
+		uvDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:       "uv",
+			Name:     "uv-dependency-name",
+			Checksum: "uv-dependency-sha",
+			Stacks:   []string{"some-stack"},
+			URI:      "uv-dependency-uri",
+			Version:  "uv-dependency-version",
+		}
+
+		// Legacy SBOM
+		uvDependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
+			{
+				Name: "uv",
+				Metadata: paketosbom.BOMMetadata{
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
+						Hash:      "uv-dependency-sha",
+					},
+					URI:     "uv-dependency-uri",
+					Version: "uv-dependency-version",
+				},
+			},
+		}
+
+		uvInstallProcess = &uvfakes.InstallProcess{}
+
 		buildParameters = pkgcommon.CommonBuildParameters{
 			SbomGenerator: pkgcommon.Generator{},
 			Clock:         chronos.DefaultClock,
@@ -242,6 +276,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				DependencyManager:  poetryDependencyManager,
 				InstallProcess:     poetryProcess,
 				SitePackageProcess: poetrySitePackageProcess,
+			},
+			uv.Uv: uv.UvBuildParameters{
+				DependencyManager: uvDependencyManager,
+				InstallProcess:    uvInstallProcess,
 			},
 		}
 
@@ -302,9 +340,20 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				},
 				1,
 			},
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: uv.Uv,
+						},
+					},
+				},
+				1,
+			},
 		}
 		Expect(os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte(`python-requires = "3.13.0"`), 0755)).To(Succeed())
 	})
 
 	it("runs the build process and returns expected layers", func() {

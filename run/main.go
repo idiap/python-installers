@@ -20,6 +20,7 @@ import (
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
+	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 )
 
 func main() {
@@ -50,6 +51,10 @@ func main() {
 			DependencyManager:  postal.NewService(cargo.NewTransport()),
 			InstallProcess:     poetry.NewPoetryInstallProcess(pexec.NewExecutable("python")),
 			SitePackageProcess: poetry.NewSiteProcess(pexec.NewExecutable("python")),
+		},
+		uv.Uv: uv.UvBuildParameters{
+			DependencyManager: postal.NewService(cargo.NewTransport()),
+			InstallProcess:    uv.NewUvInstallProcess(),
 		},
 	}
 

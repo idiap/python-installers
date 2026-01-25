@@ -118,5 +118,10 @@ func TestIntegration(t *testing.T) {
 	suite("Poetry LayerReuse", poetryTestLayerReuse, spec.Parallel())
 	suite("Poetry Versions", poetryTestVersions, spec.Parallel())
 
+	// uv
+	suite("uv Default", uvTestDefault, spec.Parallel())
+	suite("uv LayerReuse", uvTestLayerReuse, spec.Parallel())
+	suite("uv Offline", uvTestOffline, spec.Parallel())
+
 	suite.Run(t)
 }
