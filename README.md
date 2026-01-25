@@ -17,11 +17,11 @@ The buildpack is published for consumption at
 ## Behavior
 This buildpack participates if one of the following detection succeeds:
 
-- (miniconda)[installers/pkg/minconda/README.md] -> Always
-- (pip)[installers/pkg/pip/README.md] -> Always
-- (pipenv)[installers/pkg/pipenv/README.md] -> Always
-- (poetry)[installers/pkg/poetry/README.md] -> `pyproject.toml` is present in the root folder
-- (uv)[installers/pkg/uv/README.md] -> `uv.lock` is present in the root folder
+- (miniconda)[pkg/installers/minconda/README.md] -> Always
+- (pip)[pkg/installers/pip/README.md] -> Always
+- (pipenv)[pkg/installers/pipenv/README.md] -> Always
+- (poetry)[pkg/installers/poetry/README.md] -> `pyproject.toml` is present in the root folder
+- (uv)[pkg/installers/uv/README.md] -> `uv.lock` is present in the root folder
 
 The buildpack will do the following:
 * At build time:
