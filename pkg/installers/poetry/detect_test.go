@@ -78,11 +78,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when the BP_POETRY_VERSION is set", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_POETRY_VERSION", "some-version")).To(Succeed())
-		})
-
-		it.After(func() {
-			Expect(os.Unsetenv("BP_POETRY_VERSION")).To(Succeed())
+			t.Setenv("BP_POETRY_VERSION", "some-version")
 		})
 
 		it("returns a plan that requires that version of poetry", func() {

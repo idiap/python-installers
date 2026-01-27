@@ -15,7 +15,7 @@ import (
 func TestUnit(t *testing.T) {
 	suite := spec.New("uv", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Build", testBuild)
-	suite("Detect", testDetect)
+	suite("Detect", testDetect, spec.Sequential())
 	suite("InstallProcess", testUvInstallProcess)
 	suite("Parser", testUvLockParser)
 	suite.Run(t)
