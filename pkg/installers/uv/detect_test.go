@@ -41,9 +41,6 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	context("when the BP_UV_VERSION is NOT set", func() {
-		it.Before(func() {
-			Expect(os.Unsetenv("BP_UV_VERSION")).To(Succeed())
-		})
 		it("returns a plan that provides uv", func() {
 			result, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
@@ -61,11 +58,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when the BP_UV_VERSION is set", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_UV_VERSION", "some-version")).To(Succeed())
-		})
-
-		it.After(func() {
-			Expect(os.Unsetenv("BP_UV_VERSION")).To(Succeed())
+			t.Setenv("BP_UV_VERSION", "some-version")
 		})
 
 		it("returns a plan that requires that version of poetry", func() {
