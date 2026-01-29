@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/paketo-buildpacks/packit/v2/pexec"
 )
@@ -32,13 +33,14 @@ func NewPipenvInstallProcess(executable Executable) PipenvInstallProcess {
 
 // Execute installs the provided version of pipenv from the internet into the
 // layer path designated by targetLayerPath
-func (p PipenvInstallProcess) Execute(version, targetLayerPath string) error {
+func (p PipenvInstallProcess) Execute(version, targetLayerPath, pipLayerPath string) error {
 	buffer := bytes.NewBuffer(nil)
 
+	pipPath := fmt.Sprintf("PATH=%s", filepath.Join(pipLayerPath, "bin"))
 	err := p.executable.Execute(pexec.Execution{
 		Args: []string{"install", fmt.Sprintf("pipenv==%s", version), "--user"},
-		// Set the PYTHONUSERBASE to ensure that pip is installed to the newly created target layer.
-		Env:    append(os.Environ(), fmt.Sprintf("PYTHONUSERBASE=%s", targetLayerPath)),
+		// Set the PYTHONUSERBASE to ensure that pipenv is installed to the newly created target layer.
+		Env:    append(os.Environ(), pipPath, fmt.Sprintf("PYTHONUSERBASE=%s", targetLayerPath)),
 		Stdout: buffer,
 		Stderr: buffer,
 	})

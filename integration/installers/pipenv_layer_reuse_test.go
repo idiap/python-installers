@@ -80,7 +80,6 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -93,7 +92,6 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -119,8 +117,8 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(MatchRegexp(`pipenv, version \d+\.\d+\.\d+`))
 
-			Expect(secondImage.Buildpacks[2].Key).To(Equal(buildpackInfo.Buildpack.ID))
-			Expect(secondImage.Buildpacks[2].Layers["pipenv"].SHA).To(Equal(firstImage.Buildpacks[2].Layers["pipenv"].SHA))
+			Expect(secondImage.Buildpacks[1].Key).To(Equal(buildpackInfo.Buildpack.ID))
+			Expect(secondImage.Buildpacks[1].Layers["pipenv"].SHA).To(Equal(firstImage.Buildpacks[1].Layers["pipenv"].SHA))
 		})
 	})
 
@@ -142,7 +140,6 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -154,7 +151,6 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -200,8 +196,8 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(MatchRegexp(`pipenv, version \d+\.\d+\.\d+`))
 
-			Expect(secondImage.Buildpacks[2].Key).To(Equal(buildpackInfo.Buildpack.ID))
-			Expect(secondImage.Buildpacks[2].Layers["pipenv"].SHA).ToNot(Equal(firstImage.Buildpacks[2].Layers["pipenv"].SHA))
+			Expect(secondImage.Buildpacks[1].Key).To(Equal(buildpackInfo.Buildpack.ID))
+			Expect(secondImage.Buildpacks[1].Layers["pipenv"].SHA).ToNot(Equal(firstImage.Buildpacks[1].Layers["pipenv"].SHA))
 		})
 	})
 }

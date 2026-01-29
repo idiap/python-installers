@@ -79,6 +79,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 		plans = append(plans, packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{
+				{Name: pipenv.Pip},
 				{Name: pipenv.Pipenv},
 			},
 			Requires: []packit.BuildPlanRequirement{

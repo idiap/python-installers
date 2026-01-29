@@ -8,24 +8,10 @@ import (
 	"os"
 
 	"github.com/paketo-buildpacks/packit/v2"
+
+	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 )
-
-// BuildPlanMetadata is the buildpack specific data included in build plan
-// requirements.
-type BuildPlanMetadata struct {
-	// VersionSource denotes where dependency version came from (e.g. an
-	// environment variable).
-	VersionSource string `toml:"version-source"`
-
-	// Version denotes the version of a dependency, if there is one.
-	Version string `toml:"version"`
-
-	// Build denotes the dependency is needed at build-time.
-	Build bool `toml:"build"`
-
-	// Launch denotes the dependency is needed at runtime.
-	Launch bool `toml:"launch"`
-}
 
 // Detect will return a packit.DetectFunc that will be invoked during the
 // detect phase of the buildpack lifecycle.
@@ -40,24 +26,20 @@ func Detect() packit.DetectFunc {
 
 		requirements := []packit.BuildPlanRequirement{
 			{
-				Name: Pip,
-				Metadata: BuildPlanMetadata{
-					Build: true,
-				},
-			},
-			{
 				Name: CPython,
-				Metadata: BuildPlanMetadata{
+				Metadata: pythoninstallers.BuildPlanMetadata{
 					Build: true,
 				},
 			},
 		}
 
+		requirements = append(requirements, pip.GetRequirement())
+
 		pipEnvVersion, ok := os.LookupEnv("BP_PIPENV_VERSION")
 		if ok {
 			requirements = append(requirements, packit.BuildPlanRequirement{
 				Name: Pipenv,
-				Metadata: BuildPlanMetadata{
+				Metadata: pythoninstallers.BuildPlanMetadata{
 					Version:       pipEnvVersion,
 					VersionSource: "BP_PIPENV_VERSION",
 				},
@@ -67,6 +49,7 @@ func Detect() packit.DetectFunc {
 		return packit.DetectResult{
 			Plan: packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
+					{Name: Pip},
 					{Name: Pipenv},
 				},
 				Requires: requirements,

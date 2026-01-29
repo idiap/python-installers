@@ -32,7 +32,7 @@ type DependencyManager interface {
 
 // InstallProcess defines the interface for installing the pipenv dependency into a layer.
 type InstallProcess interface {
-	Execute(version, destLayerPath string) error
+	Execute(version, destLayerPath, pipLayerPath string) error
 }
 
 // SitePackageProcess defines the interface for looking up site packages within a layer.
@@ -128,8 +128,13 @@ func Build(
 		logger.Process("Executing build process")
 		logger.Subprocess(fmt.Sprintf("Installing Pipenv %s", dependency.Version))
 
+		pipLayer, err := context.Layers.Get(Pip)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
 		duration, err := clock.Measure(func() error {
-			return installProcess.Execute(dependency.Version, pipenvLayer.Path)
+			return installProcess.Execute(dependency.Version, pipenvLayer.Path, pipLayer.Path)
 		})
 
 		if err != nil {
