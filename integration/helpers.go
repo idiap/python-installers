@@ -31,10 +31,6 @@ type TestSettings struct {
 			Online  string
 			Offline string
 		}
-		Pip struct {
-			Online  string
-			Offline string
-		}
 		BuildPlan struct {
 			Online string
 		}
@@ -47,7 +43,6 @@ type TestSettings struct {
 
 	Config struct {
 		CPython   string `json:"cpython"`
-		Pip       string `json:"pip"`
 		BuildPlan string `json:"build-plan"`
 	}
 }
