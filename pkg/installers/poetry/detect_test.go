@@ -15,6 +15,8 @@ import (
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 	"github.com/sclevine/spec"
+
+	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
 )
 
 func testDetect(t *testing.T, context spec.G, it spec.S) {
@@ -54,21 +56,22 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(result).To(Equal(packit.DetectResult{
 			Plan: packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
-					{Name: "poetry"},
+					{Name: poetry.Pip},
+					{Name: poetry.PoetryDependency},
 				},
 				Requires: []packit.BuildPlanRequirement{
 					{
-						Name: poetry.Pip,
-						Metadata: poetry.BuildPlanMetadata{
-							Build: true,
-						},
-					},
-					{
 						Name: poetry.CPython,
-						Metadata: poetry.BuildPlanMetadata{
+						Metadata: pythoninstallers.BuildPlanMetadata{
 							Build:         true,
 							Version:       "1.2.3",
 							VersionSource: "pyproject.toml",
+						},
+					},
+					{
+						Name: poetry.Pip,
+						Metadata: pythoninstallers.BuildPlanMetadata{
+							Build: true,
 						},
 					},
 				},
@@ -90,26 +93,27 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Expect(result).To(Equal(packit.DetectResult{
 				Plan: packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{
-						{Name: "poetry"},
+						{Name: poetry.Pip},
+						{Name: poetry.PoetryDependency},
 					},
 					Requires: []packit.BuildPlanRequirement{
 						{
-							Name: poetry.Pip,
-							Metadata: poetry.BuildPlanMetadata{
-								Build: true,
-							},
-						},
-						{
 							Name: poetry.CPython,
-							Metadata: poetry.BuildPlanMetadata{
+							Metadata: pythoninstallers.BuildPlanMetadata{
 								Build:         true,
 								Version:       "1.2.3",
 								VersionSource: "pyproject.toml",
 							},
 						},
 						{
-							Name: "poetry",
-							Metadata: poetry.BuildPlanMetadata{
+							Name: poetry.Pip,
+							Metadata: pythoninstallers.BuildPlanMetadata{
+								Build: true,
+							},
+						},
+						{
+							Name: poetry.PoetryDependency,
+							Metadata: pythoninstallers.BuildPlanMetadata{
 								VersionSource: "BP_POETRY_VERSION",
 								Version:       "some-version",
 							},

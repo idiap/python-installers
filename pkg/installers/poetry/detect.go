@@ -8,15 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
+	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
+
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 )
-
-type BuildPlanMetadata struct {
-	VersionSource string `toml:"version-source"`
-	Build         bool   `toml:"build"`
-	Version       string `toml:"version"`
-}
 
 //go:generate faux --interface PyProjectPythonVersionParser --output fakes/pyproject_parser.go
 type PyProjectPythonVersionParser interface {
@@ -48,14 +45,8 @@ func Detect(parser PyProjectPythonVersionParser) packit.DetectFunc {
 
 		requirements := []packit.BuildPlanRequirement{
 			{
-				Name: Pip,
-				Metadata: BuildPlanMetadata{
-					Build: true,
-				},
-			},
-			{
 				Name: CPython,
-				Metadata: BuildPlanMetadata{
+				Metadata: pythoninstallers.BuildPlanMetadata{
 					Build:         true,
 					Version:       pythonVersion,
 					VersionSource: PyProjectTomlFile,
@@ -63,10 +54,12 @@ func Detect(parser PyProjectPythonVersionParser) packit.DetectFunc {
 			},
 		}
 
+		requirements = append(requirements, pip.GetRequirement())
+
 		if version, ok := os.LookupEnv("BP_POETRY_VERSION"); ok {
 			requirements = append(requirements, packit.BuildPlanRequirement{
 				Name: PoetryDependency,
-				Metadata: BuildPlanMetadata{
+				Metadata: pythoninstallers.BuildPlanMetadata{
 					VersionSource: "BP_POETRY_VERSION",
 					Version:       version,
 				},
@@ -76,6 +69,7 @@ func Detect(parser PyProjectPythonVersionParser) packit.DetectFunc {
 		return packit.DetectResult{
 			Plan: packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
+					{Name: Pip},
 					{Name: PoetryDependency},
 				},
 				Requires: requirements,
