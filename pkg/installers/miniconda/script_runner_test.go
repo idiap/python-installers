@@ -10,9 +10,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/sclevine/spec"
+
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
-	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
 )

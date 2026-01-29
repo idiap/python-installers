@@ -8,8 +8,9 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit/v2"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	"github.com/sclevine/spec"
+
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 
 	. "github.com/onsi/gomega"
 )

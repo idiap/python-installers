@@ -10,8 +10,9 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/sclevine/spec"
+
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 )
 
 func testPyProjectParser(t *testing.T, context spec.G, it spec.S) {

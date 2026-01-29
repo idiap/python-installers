@@ -12,9 +12,10 @@ import (
 
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/packit/v2"
+	"github.com/sclevine/spec"
+
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
-	"github.com/sclevine/spec"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
 )
