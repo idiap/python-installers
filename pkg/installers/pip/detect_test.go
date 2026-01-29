@@ -8,10 +8,12 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit/v2"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
+
+	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 )
 
 func testDetect(t *testing.T, context spec.G, it spec.S) {
@@ -39,7 +41,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: pip.CPython,
-						Metadata: pip.BuildPlanMetadata{
+						Metadata: pythoninstallers.BuildPlanMetadata{
 							Build: true,
 						},
 					},
@@ -63,13 +65,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []packit.BuildPlanRequirement{
 						{
 							Name: pip.CPython,
-							Metadata: pip.BuildPlanMetadata{
+							Metadata: pythoninstallers.BuildPlanMetadata{
 								Build: true,
 							},
 						},
 						{
 							Name: pip.Pip,
-							Metadata: pip.BuildPlanMetadata{
+							Metadata: pythoninstallers.BuildPlanMetadata{
 								Version:       "some-version",
 								VersionSource: "BP_PIP_VERSION",
 							},
@@ -95,13 +97,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []packit.BuildPlanRequirement{
 							{
 								Name: pip.CPython,
-								Metadata: pip.BuildPlanMetadata{
+								Metadata: pythoninstallers.BuildPlanMetadata{
 									Build: true,
 								},
 							},
 							{
 								Name: pip.Pip,
-								Metadata: pip.BuildPlanMetadata{
+								Metadata: pythoninstallers.BuildPlanMetadata{
 									Version:       "2.11.0",
 									VersionSource: "BP_PIP_VERSION",
 								},
@@ -128,13 +130,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []packit.BuildPlanRequirement{
 							{
 								Name: pip.CPython,
-								Metadata: pip.BuildPlanMetadata{
+								Metadata: pythoninstallers.BuildPlanMetadata{
 									Build: true,
 								},
 							},
 							{
 								Name: pip.Pip,
-								Metadata: pip.BuildPlanMetadata{
+								Metadata: pythoninstallers.BuildPlanMetadata{
 									Version:       "22.1.3",
 									VersionSource: "BP_PIP_VERSION",
 								},
@@ -161,13 +163,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						Requires: []packit.BuildPlanRequirement{
 							{
 								Name: pip.CPython,
-								Metadata: pip.BuildPlanMetadata{
+								Metadata: pythoninstallers.BuildPlanMetadata{
 									Build: true,
 								},
 							},
 							{
 								Name: pip.Pip,
-								Metadata: pip.BuildPlanMetadata{
+								Metadata: pythoninstallers.BuildPlanMetadata{
 									Version:       "some.other",
 									VersionSource: "BP_PIP_VERSION",
 								},
