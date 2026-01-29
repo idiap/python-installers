@@ -6,6 +6,5 @@
     ],
 
     "build-plan": "index.docker.io/paketocommunity/build-plan",
-    "cpython": "index.docker.io/paketobuildpacks/cpython",
-    "pip": "index.docker.io/paketobuildpacks/pip"
+    "cpython": "index.docker.io/paketobuildpacks/cpython"
 }
