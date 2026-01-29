@@ -29,3 +29,19 @@ type CommonBuildParameters struct {
 	Clock         chronos.Clock
 	Logger        scribe.Emitter
 }
+
+// BuildPlanMetadata is the buildpack specific data included in build plan
+// requirements.
+type BuildPlanMetadata struct {
+	// Build denotes the dependency is needed at build-time.
+	Build bool `toml:"build"`
+
+	// Launch denotes the dependency is needed at runtime.
+	Launch bool `toml:"launch"`
+
+	// Version denotes the version of a dependency, if there is one.
+	Version string `toml:"version"`
+
+	// VersionSource denotes where dependency version came from (e.g. an environment variable).
+	VersionSource string `toml:"version-source"`
+}
