@@ -21,20 +21,19 @@ import (
 type PackagerParameters interface {
 }
 
-func validateResult(result packit.BuildResult, err error) (packit.BuildResult, error) {
-	if err != nil {
-		return packit.BuildResult{}, err
-	}
-
-	return result, err
-}
-
 func Build(
 	logger scribe.Emitter,
 	commonBuildParameters pythoninstallers.CommonBuildParameters,
 	buildParameters map[string]PackagerParameters,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
+
+		if len(context.Plan.Entries) == 0 {
+			return packit.BuildResult{}, packit.Fail.WithMessage("empty plan: %s", context.Plan)
+		}
+
+		var results []packit.BuildResult
+
 		for _, entry := range context.Plan.Entries {
 			logger.Title("Handling %s", entry.Name)
 			parameters, ok := buildParameters[entry.Name]
@@ -50,7 +49,10 @@ func Build(
 					commonBuildParameters,
 				)(context)
 
-				return validateResult(result, err)
+				if err != nil {
+					return packit.BuildResult{}, err
+				}
+				results = append(results, result)
 
 			case pipenv.Pipenv:
 				result, err := pipenv.Build(
@@ -58,7 +60,10 @@ func Build(
 					commonBuildParameters,
 				)(context)
 
-				return validateResult(result, err)
+				if err != nil {
+					return packit.BuildResult{}, err
+				}
+				results = append(results, result)
 
 			case miniconda.Conda:
 				result, err := miniconda.Build(
@@ -66,7 +71,10 @@ func Build(
 					commonBuildParameters,
 				)(context)
 
-				return validateResult(result, err)
+				if err != nil {
+					return packit.BuildResult{}, err
+				}
+				results = append(results, result)
 
 			case poetry.PoetryDependency:
 				result, err := poetry.Build(
@@ -74,7 +82,10 @@ func Build(
 					commonBuildParameters,
 				)(context)
 
-				return validateResult(result, err)
+				if err != nil {
+					return packit.BuildResult{}, err
+				}
+				results = append(results, result)
 
 			case uv.Uv:
 				result, err := uv.Build(
@@ -82,13 +93,33 @@ func Build(
 					commonBuildParameters,
 				)(context)
 
-				return validateResult(result, err)
+				if err != nil {
+					return packit.BuildResult{}, err
+				}
+				results = append(results, result)
 
 			default:
 				return packit.BuildResult{}, packit.Fail.WithMessage("unknown plan: %s", entry.Name)
 			}
 		}
 
-		return packit.BuildResult{}, packit.Fail.WithMessage("empty plan: %s", context.Plan)
+		return combineResults(results...), nil
 	}
+}
+
+func combineResults(results ...packit.BuildResult) packit.BuildResult {
+	if len(results) < 1 {
+		return packit.BuildResult{}
+	}
+	combinedResults := results[0]
+
+	for i := range results {
+		if i == 0 {
+			continue
+		}
+		combinedResults.Layers = append(combinedResults.Layers, results[i].Layers...)
+		combinedResults.Launch.BOM = append(combinedResults.Launch.BOM, results[i].Launch.BOM...)
+		combinedResults.Build.BOM = append(combinedResults.Build.BOM, results[i].Build.BOM...)
+	}
+	return combinedResults
 }
