@@ -14,6 +14,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
+	common "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
 
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -61,7 +62,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Requires: []packit.BuildPlanRequirement{
 				{
 					Name: pip.CPython,
-					Metadata: pip.BuildPlanMetadata{
+					Metadata: common.BuildPlanMetadata{
 						Build: true,
 					},
 				},
@@ -82,15 +83,15 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			},
 			Requires: []packit.BuildPlanRequirement{
 				{
-					Name: pipenv.Pip,
-					Metadata: pipenv.BuildPlanMetadata{
+					Name: pipenv.CPython,
+					Metadata: common.BuildPlanMetadata{
 						Build:  true,
 						Launch: false,
 					},
 				},
 				{
-					Name: pipenv.CPython,
-					Metadata: pipenv.BuildPlanMetadata{
+					Name: pipenv.Pip,
+					Metadata: common.BuildPlanMetadata{
 						Build:  true,
 						Launch: false,
 					},
@@ -134,17 +135,17 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						},
 						Requires: []packit.BuildPlanRequirement{
 							{
-								Name: poetry.Pip,
-								Metadata: poetry.BuildPlanMetadata{
-									Build: true,
-								},
-							},
-							{
 								Name: poetry.CPython,
-								Metadata: poetry.BuildPlanMetadata{
+								Metadata: common.BuildPlanMetadata{
 									Build:         true,
 									Version:       "1.2.3",
 									VersionSource: "pyproject.toml",
+								},
+							},
+							{
+								Name: poetry.Pip,
+								Metadata: common.BuildPlanMetadata{
+									Build: true,
 								},
 							},
 						},
