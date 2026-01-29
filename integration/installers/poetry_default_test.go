@@ -65,7 +65,6 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -98,7 +97,6 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 				"  Resolving CPython version",
 				"    Candidate version sources (in priority order):",
 				`      pyproject.toml -> "3.13.*"`,
-				`                     -> ""`,
 				`      <unknown>      -> ""`,
 			))
 			Expect(logs).To(ContainLines(
@@ -128,7 +126,6 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -161,7 +158,6 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 				"  Resolving CPython version",
 				"    Candidate version sources (in priority order):",
 				`      pyproject.toml -> "3.12.*"`,
-				`                     -> ""`,
 				`      <unknown>      -> ""`,
 			))
 			Expect(logs).To(ContainLines(
@@ -206,7 +202,6 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 					WithPullPolicy("never").
 					WithBuildpacks(
 						settings.Buildpacks.CPython.Online,
-						settings.Buildpacks.Pip.Online,
 						settings.Buildpacks.PythonInstallers.Online,
 						settings.Buildpacks.BuildPlan.Online,
 					).

@@ -30,7 +30,7 @@ type DependencyManager interface {
 
 // InstallProcess defines the interface for installing the poetry dependency into a layer.
 type InstallProcess interface {
-	Execute(version, targetLayerPath string) error
+	Execute(version, targetLayerPath, pipLayerPath string) error
 }
 
 // SitePackageProcess defines the interface for looking site packages within a layer.
@@ -122,8 +122,13 @@ func Build(
 
 		logger.Process("Executing build process")
 		logger.Subprocess("Installing Poetry %s", dependency.Version)
+		pipLayer, err := context.Layers.Get(Pip)
+		if err != nil {
+			return packit.BuildResult{}, err
+		}
+
 		duration, err := clock.Measure(func() error {
-			err = installProcess.Execute(dependency.Version, poetryLayer.Path)
+			err = installProcess.Execute(dependency.Version, poetryLayer.Path, pipLayer.Path)
 			if err != nil {
 				return err
 			}

@@ -132,7 +132,8 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				withPoetry := append(plans,
 					packit.BuildPlan{
 						Provides: []packit.BuildPlanProvision{
-							{Name: "poetry"},
+							{Name: poetry.Pip},
+							{Name: poetry.PoetryDependency},
 						},
 						Requires: []packit.BuildPlanRequirement{
 							{

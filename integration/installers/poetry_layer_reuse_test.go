@@ -77,7 +77,6 @@ func poetryTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -103,7 +102,6 @@ func poetryTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -129,7 +127,7 @@ func poetryTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(MatchRegexp(`Poetry.*version \d+\.\d+\.\d+`))
 
-			Expect(secondImage.Buildpacks[0].Layers["poetry"].SHA).To(Equal(firstImage.Buildpacks[0].Layers["poetry"].SHA))
+			Expect(secondImage.Buildpacks[1].Layers["poetry"].SHA).To(Equal(firstImage.Buildpacks[1].Layers["poetry"].SHA))
 		})
 	})
 }
