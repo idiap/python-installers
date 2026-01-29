@@ -10,6 +10,8 @@ import (
 	"testing"
 
 	"github.com/paketo-buildpacks/packit/v2"
+
+	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	"github.com/sclevine/spec"
 
@@ -41,19 +43,20 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		Expect(result).To(Equal(packit.DetectResult{
 			Plan: packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
-					{Name: "pipenv"},
+					{Name: pipenv.Pip},
+					{Name: pipenv.Pipenv},
 				},
 				Requires: []packit.BuildPlanRequirement{
 					{
-						Name: pipenv.Pip,
-						Metadata: pipenv.BuildPlanMetadata{
+						Name: pipenv.CPython,
+						Metadata: pythoninstallers.BuildPlanMetadata{
 							Build:  true,
 							Launch: false,
 						},
 					},
 					{
-						Name: pipenv.CPython,
-						Metadata: pipenv.BuildPlanMetadata{
+						Name: pipenv.Pip,
+						Metadata: pythoninstallers.BuildPlanMetadata{
 							Build:  true,
 							Launch: false,
 						},
@@ -76,26 +79,27 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Expect(result).To(Equal(packit.DetectResult{
 				Plan: packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{
-						{Name: "pipenv"},
+						{Name: pipenv.Pip},
+						{Name: pipenv.Pipenv},
 					},
 					Requires: []packit.BuildPlanRequirement{
 						{
-							Name: pipenv.Pip,
-							Metadata: pipenv.BuildPlanMetadata{
-								Build:  true,
-								Launch: false,
-							},
-						},
-						{
 							Name: pipenv.CPython,
-							Metadata: pipenv.BuildPlanMetadata{
+							Metadata: pythoninstallers.BuildPlanMetadata{
 								Build:  true,
 								Launch: false,
 							},
 						},
 						{
-							Name: "pipenv",
-							Metadata: pipenv.BuildPlanMetadata{
+							Name: pipenv.Pip,
+							Metadata: pythoninstallers.BuildPlanMetadata{
+								Build:  true,
+								Launch: false,
+							},
+						},
+						{
+							Name: pipenv.Pipenv,
+							Metadata: pythoninstallers.BuildPlanMetadata{
 								Version:       "1.2.3",
 								VersionSource: "BP_PIPENV_VERSION",
 							},

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/paketo-buildpacks/packit/v2/pexec"
@@ -24,6 +25,7 @@ func testPipenvInstallProcess(t *testing.T, context spec.G, it spec.S) {
 
 		version       = "1.2.3-some.version"
 		destLayerPath string
+		pipLayerPath  string
 		executable    *fakes.Executable
 
 		pipenvInstallProcess pipenv.PipenvInstallProcess
@@ -31,6 +33,7 @@ func testPipenvInstallProcess(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		destLayerPath = t.TempDir()
+		pipLayerPath = t.TempDir()
 
 		executable = &fakes.Executable{}
 
@@ -40,10 +43,13 @@ func testPipenvInstallProcess(t *testing.T, context spec.G, it spec.S) {
 	context("Execute", func() {
 		context("there is a pipenv dependency to install", func() {
 			it("installs it to the pipenv layer", func() {
-				err := pipenvInstallProcess.Execute(version, destLayerPath)
+				err := pipenvInstallProcess.Execute(version, destLayerPath, pipLayerPath)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(executable.ExecuteCall.Receives.Execution.Env).To(Equal(append(os.Environ(), fmt.Sprintf("PYTHONUSERBASE=%s", destLayerPath))))
+				Expect(executable.ExecuteCall.Receives.Execution.Env).To(Equal(append(os.Environ(),
+					fmt.Sprintf("PATH=%s", filepath.Join(pipLayerPath, "bin")),
+					fmt.Sprintf("PYTHONUSERBASE=%s", destLayerPath)),
+				))
 				Expect(executable.ExecuteCall.Receives.Execution.Args).To(Equal([]string{"install", "pipenv==1.2.3-some.version", "--user"}))
 			})
 		})
@@ -61,7 +67,7 @@ func testPipenvInstallProcess(t *testing.T, context spec.G, it spec.S) {
 				})
 
 				it("returns an error", func() {
-					err := pipenvInstallProcess.Execute(version, destLayerPath)
+					err := pipenvInstallProcess.Execute(version, destLayerPath, pipLayerPath)
 					Expect(err).To(MatchError(ContainSubstring("installing pipenv failed")))
 					Expect(err).To(MatchError(ContainSubstring("stdout output")))
 					Expect(err).To(MatchError(ContainSubstring("stderr output")))

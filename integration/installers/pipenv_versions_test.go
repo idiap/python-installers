@@ -79,7 +79,6 @@ func pipenvTestVersions(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
@@ -110,7 +109,6 @@ func pipenvTestVersions(t *testing.T, context spec.G, it spec.S) {
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.CPython.Online,
-					settings.Buildpacks.Pip.Online,
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).

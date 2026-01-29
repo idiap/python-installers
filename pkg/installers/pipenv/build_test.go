@@ -175,6 +175,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(installProcess.ExecuteCall.Receives.Version).To(ContainSubstring("pipenv-dependency-version"))
 		Expect(installProcess.ExecuteCall.Receives.DestLayerPath).To(Equal(filepath.Join(layersDir, "pipenv")))
+		Expect(installProcess.ExecuteCall.Receives.PipLayerPath).To(Equal(filepath.Join(layersDir, "pip")))
 	})
 
 	context("when build plan entries require pipenv at build/launch", func() {
