@@ -11,13 +11,9 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/fs"
-)
 
-type BuildPlanMetadata struct {
-	VersionSource string `toml:"version-source"`
-	Build         bool   `toml:"build"`
-	Version       string `toml:"version"`
-}
+	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+)
 
 // Detect will return a packit.DetectFunc that will be invoked during the
 // detect phase of the buildpack lifecycle.
@@ -53,7 +49,7 @@ func Detect() packit.DetectFunc {
 			plan.Requires = []packit.BuildPlanRequirement{
 				{
 					Name: Uv,
-					Metadata: BuildPlanMetadata{
+					Metadata: pythoninstallers.BuildPlanMetadata{
 						VersionSource: "BP_UV_VERSION",
 						Version:       version,
 					},
