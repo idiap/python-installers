@@ -34,72 +34,78 @@ func Build(
 
 		var results []packit.BuildResult
 
-		for _, entry := range context.Plan.Entries {
-			logger.Title("Handling %s", entry.Name)
-			parameters, ok := buildParameters[entry.Name]
+		orderedInstallers := []string{pip.Pip, pipenv.Pipenv, poetry.PoetryDependency, miniconda.Conda, uv.Uv}
 
-			if !ok {
-				return packit.BuildResult{}, packit.Fail.WithMessage("missing parameters for: %s", entry.Name)
-			}
+		for _, installer := range orderedInstallers {
+			for _, entry := range context.Plan.Entries {
+				if entry.Name == installer {
+					logger.Title("Handling %s", entry.Name)
+					parameters, ok := buildParameters[entry.Name]
 
-			switch entry.Name {
-			case pip.Pip:
-				result, err := pip.Build(
-					parameters.(pip.PipBuildParameters),
-					commonBuildParameters,
-				)(context)
+					if !ok {
+						return packit.BuildResult{}, packit.Fail.WithMessage("missing parameters for: %s", entry.Name)
+					}
 
-				if err != nil {
-					return packit.BuildResult{}, err
+					switch entry.Name {
+					case pip.Pip:
+						result, err := pip.Build(
+							parameters.(pip.PipBuildParameters),
+							commonBuildParameters,
+						)(context)
+
+						if err != nil {
+							return packit.BuildResult{}, err
+						}
+						results = append(results, result)
+
+					case pipenv.Pipenv:
+						result, err := pipenv.Build(
+							parameters.(pipenv.PipEnvBuildParameters),
+							commonBuildParameters,
+						)(context)
+
+						if err != nil {
+							return packit.BuildResult{}, err
+						}
+						results = append(results, result)
+
+					case poetry.PoetryDependency:
+						result, err := poetry.Build(
+							parameters.(poetry.PoetryBuildParameters),
+							commonBuildParameters,
+						)(context)
+
+						if err != nil {
+							return packit.BuildResult{}, err
+						}
+						results = append(results, result)
+
+					case miniconda.Conda:
+						result, err := miniconda.Build(
+							parameters.(miniconda.CondaBuildParameters),
+							commonBuildParameters,
+						)(context)
+
+						if err != nil {
+							return packit.BuildResult{}, err
+						}
+						results = append(results, result)
+
+					case uv.Uv:
+						result, err := uv.Build(
+							parameters.(uv.UvBuildParameters),
+							commonBuildParameters,
+						)(context)
+
+						if err != nil {
+							return packit.BuildResult{}, err
+						}
+						results = append(results, result)
+
+					default:
+						return packit.BuildResult{}, packit.Fail.WithMessage("unknown plan: %s", entry.Name)
+					}
 				}
-				results = append(results, result)
-
-			case pipenv.Pipenv:
-				result, err := pipenv.Build(
-					parameters.(pipenv.PipEnvBuildParameters),
-					commonBuildParameters,
-				)(context)
-
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
-				results = append(results, result)
-
-			case miniconda.Conda:
-				result, err := miniconda.Build(
-					parameters.(miniconda.CondaBuildParameters),
-					commonBuildParameters,
-				)(context)
-
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
-				results = append(results, result)
-
-			case poetry.PoetryDependency:
-				result, err := poetry.Build(
-					parameters.(poetry.PoetryBuildParameters),
-					commonBuildParameters,
-				)(context)
-
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
-				results = append(results, result)
-
-			case uv.Uv:
-				result, err := uv.Build(
-					parameters.(uv.UvBuildParameters),
-					commonBuildParameters,
-				)(context)
-
-				if err != nil {
-					return packit.BuildResult{}, err
-				}
-				results = append(results, result)
-
-			default:
-				return packit.BuildResult{}, packit.Fail.WithMessage("unknown plan: %s", entry.Name)
 			}
 		}
 

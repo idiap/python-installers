@@ -350,6 +350,32 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				},
 				1,
 			},
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: pip.Pip,
+						},
+						{
+							Name: pipenv.Pipenv,
+						},
+					},
+				},
+				3,
+			},
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
+							Name: pip.Pip,
+						},
+						{
+							Name: poetry.PoetryDependency,
+						},
+					},
+				},
+				3,
+			},
 		}
 		Expect(os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
@@ -365,6 +391,42 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 			layers := result.Layers
 			Expect(layers).To(HaveLen(testPlan.OutputLayerCount))
+		}
+	})
+
+	it("runs the build process and returns layers in expected order", func() {
+		orderTestPlans := []packit.BuildpackPlan{
+			{
+				Entries: []packit.BuildpackPlanEntry{
+					{
+						Name: pipenv.Pipenv,
+					},
+					{
+						Name: pip.Pip,
+					},
+				},
+			},
+			{
+				Entries: []packit.BuildpackPlanEntry{
+					{
+						Name: poetry.PoetryDependency,
+					},
+					{
+						Name: pip.Pip,
+					},
+				},
+			},
+		}
+		for _, testPlan := range orderTestPlans {
+			logger.Detail("Doing: %s", testPlan)
+			buildContext.Plan = testPlan
+			result, err := build(buildContext)
+			Expect(err).NotTo(HaveOccurred())
+
+			layers := result.Layers
+			Expect(layers[0].Name).To(Equal(pip.Pip))
+			// Pip adds two layers
+			Expect(layers[2].Name).To(Equal(testPlan.Entries[0].Name))
 		}
 	})
 
