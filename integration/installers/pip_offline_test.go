@@ -44,7 +44,7 @@ func pipTestOffline(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "pip_app"))
+			source, err = occam.Source(filepath.Join("testdata", "pip", "pip_app"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 

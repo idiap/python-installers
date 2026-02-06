@@ -33,7 +33,7 @@ func uvTestDefault(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 
 		var err error
-		source, err = occam.Source(filepath.Join("testdata", "uv_app"))
+		source, err = occam.Source(filepath.Join("testdata", "uv", "uv_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 

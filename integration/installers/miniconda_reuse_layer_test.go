@@ -44,7 +44,7 @@ func minicondaTestReusingLayerRebuild(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = map[string]struct{}{}
 		containerIDs = map[string]struct{}{}
 
-		source, err = occam.Source(filepath.Join("testdata", "miniconda_app"))
+		source, err = occam.Source(filepath.Join("testdata", "conda", "miniconda_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 

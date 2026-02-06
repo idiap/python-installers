@@ -33,7 +33,7 @@ func pipTestDefault(t *testing.T, context spec.G, it spec.S) {
 		docker = occam.NewDocker()
 
 		var err error
-		source, err = occam.Source(filepath.Join("testdata", "pip_app"))
+		source, err = occam.Source(filepath.Join("testdata", "pip", "pip_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 

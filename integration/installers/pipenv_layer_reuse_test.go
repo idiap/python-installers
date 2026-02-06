@@ -47,7 +47,7 @@ func pipenvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = collections.NewSet()
 		containerIDs = collections.NewSet()
 
-		source, err = occam.Source(filepath.Join("testdata", "pipenv_app"))
+		source, err = occam.Source(filepath.Join("testdata", "pipenv", "pipenv_app"))
 		Expect(err).ToNot(HaveOccurred())
 	})
 

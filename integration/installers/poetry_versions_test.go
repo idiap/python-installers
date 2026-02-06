@@ -50,7 +50,7 @@ func poetryTestVersions(t *testing.T, context spec.G, it spec.S) {
 			containersMap = map[string]interface{}{}
 			imagesMap = map[string]interface{}{}
 
-			source, err = occam.Source(filepath.Join("testdata", "poetry_app"))
+			source, err = occam.Source(filepath.Join("testdata", "poetry", "poetry_app"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 

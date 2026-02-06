@@ -43,7 +43,7 @@ func minicondaTestOffline(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "miniconda_app"))
+			source, err = occam.Source(filepath.Join("testdata", "conda", "miniconda_app"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 

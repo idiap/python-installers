@@ -43,7 +43,7 @@ func uvTestOffline(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "uv_app_offline"))
+			source, err = occam.Source(filepath.Join("testdata", "uv", "uv_app_offline"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 
