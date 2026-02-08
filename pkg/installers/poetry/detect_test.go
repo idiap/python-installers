@@ -24,7 +24,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		parsePythonVersion *fakes.PyProjectPythonVersionParser
+		parsePythonVersion *fakes.PoetryPyProjectParser
 
 		workingDir string
 
@@ -36,8 +36,9 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		workingDir, err = os.MkdirTemp("", "working-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		parsePythonVersion = &fakes.PyProjectPythonVersionParser{}
+		parsePythonVersion = &fakes.PoetryPyProjectParser{}
 		parsePythonVersion.ParsePythonVersionCall.Returns.String = "1.2.3"
+		parsePythonVersion.IsPoetryProjectCall.Returns.Bool = true
 
 		Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
 
@@ -134,6 +135,19 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					WorkingDir: workingDir,
 				})
 				Expect(err).To(MatchError(packit.Fail.WithMessage("pyproject.toml is not present")))
+			})
+		})
+
+		context("when pyproject.toml is not for poetry", func() {
+			it.Before(func() {
+				parsePythonVersion.IsPoetryProjectCall.Returns.Bool = false
+			})
+
+			it("fails detection", func() {
+				_, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+				Expect(err).To(MatchError(packit.Fail.WithMessage("this is not a poetry project")))
 			})
 		})
 

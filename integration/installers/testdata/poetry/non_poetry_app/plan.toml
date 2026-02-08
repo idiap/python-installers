@@ -1,0 +1,15 @@
+# Copyright (c) 2013-Present CloudFoundry.org Foundation, Inc. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[[requires]]
+name = "pip"
+
+[requires.metadata]
+launch = true
+
+[[requires]]
+name = "cpython"
+
+[requires.metadata]
+launch = true

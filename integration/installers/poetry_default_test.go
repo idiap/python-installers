@@ -45,7 +45,7 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "poetry_app"))
+			source, err = occam.Source(filepath.Join("testdata", "poetry", "poetry_app"))
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -119,7 +119,7 @@ func poetryTestDefault(t *testing.T, context spec.G, it spec.S) {
 			var err error
 			var logs fmt.Stringer
 
-			source, err = occam.Source(filepath.Join("testdata", "poetry_v1"))
+			source, err = occam.Source(filepath.Join("testdata", "poetry", "poetry_v1"))
 			Expect(err).NotTo(HaveOccurred())
 
 			image, logs, err = pack.WithNoColor().Build.

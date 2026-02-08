@@ -10,6 +10,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+type BuildSystem struct {
+	Requires     []string
+	BuildBackend string `toml:"build-backend"`
+}
+
 type PyProjectToml struct {
 	Tool struct {
 		Poetry struct {
@@ -21,16 +26,17 @@ type PyProjectToml struct {
 	Project struct {
 		RequiresPython string `toml:"requires-python"`
 	}
+	BuildSystem BuildSystem `toml:"build-system"`
 }
 
-type PyProjectParser struct {
+type PoetryPyProjectParser struct {
 }
 
-func NewPyProjectParser() PyProjectParser {
-	return PyProjectParser{}
+func NewPyProjectParser() PoetryPyProjectParser {
+	return PoetryPyProjectParser{}
 }
 
-func (p PyProjectParser) ParsePythonVersion(pyProjectToml string) (string, error) {
+func (p PoetryPyProjectParser) ParsePythonVersion(pyProjectToml string) (string, error) {
 	var pyProject PyProjectToml
 
 	_, err := toml.DecodeFile(pyProjectToml, &pyProject)
@@ -42,4 +48,15 @@ func (p PyProjectParser) ParsePythonVersion(pyProjectToml string) (string, error
 		return strings.Trim(pyProject.Project.RequiresPython, "="), nil
 	}
 	return strings.Trim(pyProject.Tool.Poetry.Dependencies.Python, "="), nil
+}
+
+func (p PoetryPyProjectParser) IsPoetryProject(pyProjectToml string) (bool, error) {
+	var pyProject PyProjectToml
+
+	_, err := toml.DecodeFile(pyProjectToml, &pyProject)
+	if err != nil {
+		return false, err
+	}
+
+	return pyProject.BuildSystem.BuildBackend == "" || pyProject.BuildSystem.BuildBackend == "poetry.core.masonry.api", nil
 }

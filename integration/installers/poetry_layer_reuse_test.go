@@ -40,7 +40,7 @@ func poetryTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		containerIDs = map[string]struct{}{}
 
 		var err error
-		source, err = occam.Source(filepath.Join("testdata", "poetry_app"))
+		source, err = occam.Source(filepath.Join("testdata", "poetry", "poetry_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 

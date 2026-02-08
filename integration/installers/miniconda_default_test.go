@@ -46,7 +46,7 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 			name, err = occam.RandomName()
 			Expect(err).NotTo(HaveOccurred())
 
-			source, err = occam.Source(filepath.Join("testdata", "miniconda_app"))
+			source, err = occam.Source(filepath.Join("testdata", "conda", "miniconda_app"))
 			Expect(err).NotTo(HaveOccurred())
 
 		})
@@ -110,7 +110,7 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				var err error
 				var logs fmt.Stringer
 
-				source, err = occam.Source(filepath.Join("testdata", "miniconda_app"))
+				source, err = occam.Source(filepath.Join("testdata", "conda", "miniconda_app"))
 				Expect(err).NotTo(HaveOccurred())
 
 				image, logs, err = pack.WithNoColor().Build.
