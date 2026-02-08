@@ -108,6 +108,7 @@ func TestIntegration(t *testing.T) {
 	suite("Poetry Default", poetryTestDefault, spec.Parallel())
 	suite("Poetry LayerReuse", poetryTestLayerReuse, spec.Parallel())
 	suite("Poetry Versions", poetryTestVersions, spec.Parallel())
+	suite("Poetry pyproject.toml", poetryTestPyProject, spec.Parallel())
 
 	// uv
 	suite("uv Default", uvTestDefault, spec.Parallel())

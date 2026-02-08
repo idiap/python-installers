@@ -36,7 +36,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		workingDir string
 		buffer     *bytes.Buffer
 
-		parsePythonVersion *poetryfakes.PyProjectPythonVersionParser
+		parsePoetryProject *poetryfakes.PoetryPyProjectParser
 
 		detect packit.DetectFunc
 
@@ -51,10 +51,11 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		parsePythonVersion = &poetryfakes.PyProjectPythonVersionParser{}
-		parsePythonVersion.ParsePythonVersionCall.Returns.String = "1.2.3"
+		parsePoetryProject = &poetryfakes.PoetryPyProjectParser{}
+		parsePoetryProject.ParsePythonVersionCall.Returns.String = "1.2.3"
+		parsePoetryProject.IsPoetryProjectCall.Returns.Bool = true
 
-		detect = pythoninstallers.Detect(logger, parsePythonVersion)
+		detect = pythoninstallers.Detect(logger, parsePoetryProject)
 
 		plans = append(plans, packit.BuildPlan{
 			Provides: []packit.BuildPlanProvision{
@@ -120,50 +121,116 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		context("with pyproject.toml", func() {
-			it.Before(func() {
-				Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte{}, os.ModePerm)).To(Succeed())
-				Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
-			})
-
-			it("passes detection", func() {
-				result, err := detect(packit.DetectContext{
-					WorkingDir: workingDir,
+			context("without build backend", func() {
+				it.Before(func() {
+					Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte{}, os.ModePerm)).To(Succeed())
 				})
 
-				withPoetry := append(plans,
-					packit.BuildPlan{
-						Provides: []packit.BuildPlanProvision{
-							{Name: poetry.Pip},
-							{Name: poetry.PoetryDependency},
-						},
-						Requires: []packit.BuildPlanRequirement{
-							{
-								Name: poetry.CPython,
-								Metadata: common.BuildPlanMetadata{
-									Build:         true,
-									Version:       "1.2.3",
-									VersionSource: "pyproject.toml",
-								},
-							},
-							{
-								Name: poetry.Pip,
-								Metadata: common.BuildPlanMetadata{
-									Build: true,
-								},
-							},
-						},
-					},
-				)
+				it("passes detection", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
 
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result.Plan).To(Equal(pythoninstallers.Or(withPoetry...)))
+					withPoetry := append(plans,
+						packit.BuildPlan{
+							Provides: []packit.BuildPlanProvision{
+								{Name: poetry.Pip},
+								{Name: poetry.PoetryDependency},
+							},
+							Requires: []packit.BuildPlanRequirement{
+								{
+									Name: poetry.CPython,
+									Metadata: common.BuildPlanMetadata{
+										Build:         true,
+										Version:       "1.2.3",
+										VersionSource: "pyproject.toml",
+									},
+								},
+								{
+									Name: poetry.Pip,
+									Metadata: common.BuildPlanMetadata{
+										Build: true,
+									},
+								},
+							},
+						},
+					)
+
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(pythoninstallers.Or(withPoetry...)))
+				})
+			})
+
+			context("with poetry build backend", func() {
+				it.Before(func() {
+					content := []byte(`
+					[build-system]
+					requires = ["poetry-core>=1.0.0"]
+					build-backend = "poetry.core.masonry.api"
+					`)
+					Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), content, os.ModePerm)).To(Succeed())
+					parsePoetryProject.IsPoetryProjectCall.Returns.Bool = true
+				})
+
+				it("passes detection", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+
+					withPoetry := append(plans,
+						packit.BuildPlan{
+							Provides: []packit.BuildPlanProvision{
+								{Name: poetry.Pip},
+								{Name: poetry.PoetryDependency},
+							},
+							Requires: []packit.BuildPlanRequirement{
+								{
+									Name: poetry.CPython,
+									Metadata: common.BuildPlanMetadata{
+										Build:         true,
+										Version:       "1.2.3",
+										VersionSource: "pyproject.toml",
+									},
+								},
+								{
+									Name: poetry.Pip,
+									Metadata: common.BuildPlanMetadata{
+										Build: true,
+									},
+								},
+							},
+						},
+					)
+
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(pythoninstallers.Or(withPoetry...)))
+				})
+			})
+
+			context("with other build backend", func() {
+				it.Before(func() {
+					content := []byte(`
+					[build-system]
+					requires = ["setuptools", "setuptools-scm"]
+					build-backend = "setuptools.build_meta"
+					`)
+					Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), content, os.ModePerm)).To(Succeed())
+					parsePoetryProject.IsPoetryProjectCall.Returns.Bool = false
+				})
+
+				it("passes detection", func() {
+					result, err := detect(packit.DetectContext{
+						WorkingDir: workingDir,
+					})
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result.Plan).To(Equal(pythoninstallers.Or(plans...)))
+				})
 			})
 		})
 
 		context("with uv.lock", func() {
 			it.Before(func() {
-				Expect(os.WriteFile(filepath.Join(workingDir, uv.LockfileName), []byte{}, os.ModePerm)).To(Succeed())
-				Expect(os.WriteFile(filepath.Join(workingDir, uv.LockfileName), []byte(`requires-python = "3.13.0"`), 0755)).To(Succeed())
+				Expect(os.WriteFile(filepath.Join(workingDir, uv.LockfileName), []byte(`requires-python = "3.13.0"`), os.ModePerm)).To(Succeed())
 			})
 
 			it("passes detection", func() {

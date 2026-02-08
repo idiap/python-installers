@@ -50,7 +50,7 @@ requires-python = "==1.2.3"`
 
 	context("Calling ParsePythonVersion", func() {
 		it("parses version", func() {
-			Expect(os.WriteFile(pyProjectToml, []byte(version), 0644)).To(Succeed())
+			Expect(os.WriteFile(pyProjectToml, []byte(version), os.ModePerm)).To(Succeed())
 
 			version, err := parser.ParsePythonVersion(pyProjectToml)
 			Expect(err).NotTo(HaveOccurred())
@@ -58,7 +58,7 @@ requires-python = "==1.2.3"`
 		})
 
 		it("parses version PEP621", func() {
-			Expect(os.WriteFile(pyProjectToml, []byte(version_pep621), 0644)).To(Succeed())
+			Expect(os.WriteFile(pyProjectToml, []byte(version_pep621), os.ModePerm)).To(Succeed())
 
 			version, err := parser.ParsePythonVersion(pyProjectToml)
 			Expect(err).NotTo(HaveOccurred())
@@ -66,7 +66,7 @@ requires-python = "==1.2.3"`
 		})
 
 		it("parses exact version PEP621", func() {
-			Expect(os.WriteFile(pyProjectToml, []byte(exact_version_pep621), 0644)).To(Succeed())
+			Expect(os.WriteFile(pyProjectToml, []byte(exact_version_pep621), os.ModePerm)).To(Succeed())
 
 			version, err := parser.ParsePythonVersion(pyProjectToml)
 			Expect(err).NotTo(HaveOccurred())
@@ -74,7 +74,7 @@ requires-python = "==1.2.3"`
 		})
 
 		it("returns empty string if file does not contain 'tool.poetry.dependencies.python' or project.requires-python", func() {
-			Expect(os.WriteFile(pyProjectToml, []byte(""), 0644)).To(Succeed())
+			Expect(os.WriteFile(pyProjectToml, []byte(""), os.ModePerm)).To(Succeed())
 
 			version, err := parser.ParsePythonVersion(pyProjectToml)
 			Expect(err).NotTo(HaveOccurred())
@@ -86,6 +86,42 @@ requires-python = "==1.2.3"`
 				_, err := parser.ParsePythonVersion("not-a-valid-dir")
 				Expect(err).To(HaveOccurred())
 			})
+		})
+	})
+
+	context("Calling IsPoetryProject", func() {
+		it("returns true on file without build-system entry", func() {
+			Expect(os.WriteFile(pyProjectToml, []byte(""), os.ModePerm)).To(Succeed())
+
+			isPoetryProject, err := parser.IsPoetryProject(pyProjectToml)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(isPoetryProject).To(BeTrue())
+		})
+
+		it("returns true on file with poetry build-system entry", func() {
+			content := []byte(`
+				[build-system]
+				requires = ["poetry-core>=1.0.0"]
+				build-backend = "poetry.core.masonry.api"
+				`)
+			Expect(os.WriteFile(pyProjectToml, content, os.ModePerm)).To(Succeed())
+
+			isPoetryProject, err := parser.IsPoetryProject(pyProjectToml)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(isPoetryProject).To(BeTrue())
+		})
+
+		it("returns false on file with other build-system entry", func() {
+			content := []byte(`
+				[build-system]
+				requires = ["setuptools", "setuptools-scm"]
+				build-backend = "setuptools.build_meta"
+				`)
+			Expect(os.WriteFile(pyProjectToml, content, os.ModePerm)).To(Succeed())
+
+			isPoetryProject, err := parser.IsPoetryProject(pyProjectToml)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(isPoetryProject).To(BeFalse())
 		})
 	})
 }

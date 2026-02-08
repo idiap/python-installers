@@ -21,7 +21,7 @@ import (
 //
 // If this buildpack detects files that indicate your app is a Python project,
 // it will pass detection.
-func Detect(logger scribe.Emitter, pyprojectVersionParser poetry.PyProjectPythonVersionParser) packit.DetectFunc {
+func Detect(logger scribe.Emitter, pyProjectParser poetry.PyProjectParser) packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 		plans := []packit.BuildPlan{}
 
@@ -49,7 +49,7 @@ func Detect(logger scribe.Emitter, pyprojectVersionParser poetry.PyProjectPython
 			logger.Detail("%s", err)
 		}
 
-		poetryResult, err := poetry.Detect(pyprojectVersionParser)(context)
+		poetryResult, err := poetry.Detect(pyProjectParser)(context)
 
 		if err == nil {
 			plans = append(plans, poetryResult.Plan)

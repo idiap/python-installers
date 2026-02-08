@@ -15,16 +15,19 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/fs"
 )
 
-//go:generate faux --interface PyProjectPythonVersionParser --output fakes/pyproject_parser.go
-type PyProjectPythonVersionParser interface {
+//go:generate faux --interface PyProjectParser --output fakes/pyproject_parser.go
+type PyProjectParser interface {
 	// ParsePythonVersion extracts `tool.poetry.dependencies.python`
 	// from pyproject.toml
 	ParsePythonVersion(string) (string, error)
+	// IsPoetryProject determines whether the pyproject.toml is
+	// configured for poetry
+	IsPoetryProject(string) (bool, error)
 }
 
 const PyProjectTomlFile = "pyproject.toml"
 
-func Detect(parser PyProjectPythonVersionParser) packit.DetectFunc {
+func Detect(parser PyProjectParser) packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 		pyProjectToml := filepath.Join(context.WorkingDir, PyProjectTomlFile)
 
@@ -32,6 +35,15 @@ func Detect(parser PyProjectPythonVersionParser) packit.DetectFunc {
 			return packit.DetectResult{}, err
 		} else if !exists {
 			return packit.DetectResult{}, packit.Fail.WithMessage("%s is not present", PyProjectTomlFile)
+		}
+
+		isPoetryProject, err := parser.IsPoetryProject(pyProjectToml)
+		if err != nil {
+			return packit.DetectResult{}, err
+		}
+
+		if !isPoetryProject {
+			return packit.DetectResult{}, packit.Fail.WithMessage("this is not a poetry project")
 		}
 
 		pythonVersion, err := parser.ParsePythonVersion(pyProjectToml)
