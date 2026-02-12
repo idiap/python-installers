@@ -321,7 +321,7 @@ api = "0.8"
 
   [[metadata.dependency-constraints]]
     constraint = "*"
-    id = "python-uv"
+    id = "uv"
     patches = 2
 
 [[stacks]]
