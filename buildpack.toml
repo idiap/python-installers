@@ -1,8 +1,3 @@
-# SPDX-FileCopyrightText: © 2025 Idiap Research Institute <contact@idiap.ch>
-# SPDX-FileContributor: Samuel Gaist <samuel.gaist@idiap.ch>
-#
-# SPDX-License-Identifier: Apache-2.0
-
 api = "0.8"
 
 [buildpack]
@@ -15,30 +10,19 @@ api = "0.8"
     uri = "https://github.com/paketo-buildpacks/python-installers/blob/main/LICENSES/Apache-2.0.txt"
 
 [metadata]
-  include-files = [
-    "linux/amd64/bin/run",
-    "linux/amd64/bin/build",
-    "linux/amd64/bin/detect",
-    "linux/arm64/bin/run",
-    "linux/arm64/bin/build",
-    "linux/arm64/bin/detect",
-    "buildpack.toml",
-  ]
+  include-files = ["linux/amd64/bin/run", "linux/amd64/bin/build", "linux/amd64/bin/detect", "linux/arm64/bin/run", "linux/arm64/bin/build", "linux/arm64/bin/detect", "buildpack.toml"]
   pre-package = "./scripts/build.sh --target linux/amd64 --target linux/arm64"
 
-  # Below are the dependencies of all supported installers
-  # miniconda
   [[metadata.dependencies]]
     arch = "amd64"
     cpe = "cpe:2.3:a:conda:miniconda3:25.3.1:*:*:*:*:python:*:*"
     id = "miniconda3"
     name = "Miniconda.sh"
     os = "linux"
-    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-x86_64.sh"
     sha256 = "b40682cedf1e1755c02555f8d3d98aadb4607a68da7caf72a9bbe1fb9ae0b904"
     source = "https://github.com/conda/conda/archive/refs/tags/25.3.1.tar.gz"
-    sha256_source = "5c6e41275154657189f169cbe02ed23b2fcb53491b457d00f8ca221603b2769b"
     stacks = ["*"]
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-x86_64.sh"
     version = "25.3.1"
 
   [[metadata.dependencies]]
@@ -47,21 +31,72 @@ api = "0.8"
     id = "miniconda3"
     name = "Miniconda.sh"
     os = "linux"
-    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-aarch64.sh"
     sha256 = "5afee04df06c923462341cfc87727100a67fa854550d0d7a2e6295005168e6b7"
     source = "https://github.com/conda/conda/archive/refs/tags/25.3.1.tar.gz"
-    sha256_source = "5c6e41275154657189f169cbe02ed23b2fcb53491b457d00f8ca221603b2769b"
     stacks = ["*"]
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-aarch64.sh"
     version = "25.3.1"
 
-  [[metadata.dependency-constraints]]
-    constraint = "*"
+  [[metadata.dependencies]]
+    arch = "amd64"
+    checksum = "sha256:790e8ea347cf49ba250fceacdc0b022237a9150717b9e4c17f2e70abc075c05d"
+    cpe = "cpe:2.3:a:conda:miniconda3:25.7.0:*:*:*:*:python:*:*"
     id = "miniconda3"
-    # Using 4 in place of two as the current logic to find new versions does not
-    # take yet into account the arch field.
-    patches = 4
+    licenses = ["BSD-3-Clause"]
+    name = "Miniconda3.sh"
+    os = "linux"
+    purl = "pkg:generic/miniconda3@25.7.0?checksum=f27a1e13f0ec6f6597e1a3f02963dd1f5a6343746a34f4f28ad2352f91543899&download_url=https://github.com/conda/conda/releases/download/25.7.0/conda-25.7.0.tar.gz"
+    source = "https://github.com/conda/conda/releases/download/25.7.0/conda-25.7.0.tar.gz"
+    source-checksum = "sha256:f27a1e13f0ec6f6597e1a3f02963dd1f5a6343746a34f4f28ad2352f91543899"
+    stacks = ["*"]
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.7.0-2-Linux-x86_64.sh"
+    version = "25.7.0"
 
-  # pip
+  [[metadata.dependencies]]
+    arch = "arm64"
+    checksum = "sha256:18befc78dbfca5bbdc2c8085f2bedd0345a5fbf7d0f1e189fddaf2d17f31d3af"
+    cpe = "cpe:2.3:a:conda:miniconda3:25.7.0:*:*:*:*:python:*:*"
+    id = "miniconda3"
+    licenses = ["BSD-3-Clause"]
+    name = "Miniconda3.sh"
+    os = "linux"
+    purl = "pkg:generic/miniconda3@25.7.0?checksum=f27a1e13f0ec6f6597e1a3f02963dd1f5a6343746a34f4f28ad2352f91543899&download_url=https://github.com/conda/conda/releases/download/25.7.0/conda-25.7.0.tar.gz"
+    source = "https://github.com/conda/conda/releases/download/25.7.0/conda-25.7.0.tar.gz"
+    source-checksum = "sha256:f27a1e13f0ec6f6597e1a3f02963dd1f5a6343746a34f4f28ad2352f91543899"
+    stacks = ["*"]
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.7.0-2-Linux-aarch64.sh"
+    version = "25.7.0"
+
+  [[metadata.dependencies]]
+    arch = "amd64"
+    checksum = "sha256:0ac18f10d17ca918247b4606df82be38eba6e23380a7eddb25b47ef6ccdb920e"
+    cpe = "cpe:2.3:a:conda:miniconda3:25.9.1:*:*:*:*:python:*:*"
+    id = "miniconda3"
+    licenses = ["BSD-3-Clause"]
+    name = "Miniconda3.sh"
+    os = "linux"
+    purl = "pkg:generic/miniconda3@25.9.1?checksum=afb3cc2393a6a05afbc37420bebdd8d23198da35f079c234aa05fedf042745dd&download_url=https://github.com/conda/conda/releases/download/25.9.1/conda-25.9.1.tar.gz"
+    source = "https://github.com/conda/conda/releases/download/25.9.1/conda-25.9.1.tar.gz"
+    source-checksum = "sha256:afb3cc2393a6a05afbc37420bebdd8d23198da35f079c234aa05fedf042745dd"
+    stacks = ["*"]
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.9.1-3-Linux-x86_64.sh"
+    version = "25.9.1"
+
+  [[metadata.dependencies]]
+    arch = "arm64"
+    checksum = "sha256:2cf395401906b6968cfd2bc5b522ad4dca40374987e790c4daa83f049d132841"
+    cpe = "cpe:2.3:a:conda:miniconda3:25.9.1:*:*:*:*:python:*:*"
+    id = "miniconda3"
+    licenses = ["BSD-3-Clause"]
+    name = "Miniconda3.sh"
+    os = "linux"
+    purl = "pkg:generic/miniconda3@25.9.1?checksum=afb3cc2393a6a05afbc37420bebdd8d23198da35f079c234aa05fedf042745dd&download_url=https://github.com/conda/conda/releases/download/25.9.1/conda-25.9.1.tar.gz"
+    source = "https://github.com/conda/conda/releases/download/25.9.1/conda-25.9.1.tar.gz"
+    source-checksum = "sha256:afb3cc2393a6a05afbc37420bebdd8d23198da35f079c234aa05fedf042745dd"
+    stacks = ["*"]
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.9.1-3-Linux-aarch64.sh"
+    version = "25.9.1"
+
   [[metadata.dependencies]]
     checksum = "sha256:6b54fb994ca5a8fe7df5d671495f480f927ed202aca6766e963eb255f58342e8"
     cpe = "cpe:2.3:a:pypa:pip:25.2.0:*:*:*:*:python:*:*"
@@ -86,44 +121,32 @@ api = "0.8"
     uri = "https://artifacts.paketo.io/pip/pip_25.3.0_noarch_7e9f0cbb.tgz"
     version = "25.3.0"
 
-  [[metadata.dependency-constraints]]
-    constraint = "*"
-    id = "pip"
-    patches = 2
-
-  # pipenv
   [[metadata.dependencies]]
-    checksum = "sha256:f0a67aa928824e61003d52acea72a94b180800019f03d38a311966f6330bc8d1"
-    cpe = "cpe:2.3:a:python-pipenv:pipenv:2025.0.3:*:*:*:*:python:*:*"
+    checksum = "sha256:19aa881e98513852c5133ac5a2d898d2546654d062f7f524ed8e0f8f222c98b5"
+    cpe = "cpe:2.3:a:python-pipenv:pipenv:2026.0.2:*:*:*:*:python:*:*"
     id = "pipenv"
     licenses = ["MIT", "MIT-0"]
     name = "Pipenv"
-    purl = "pkg:generic/pipenv@2025.0.3?checksum=f0a67aa928824e61003d52acea72a94b180800019f03d38a311966f6330bc8d1&download_url=https://files.pythonhosted.org/packages/59/ca/397e375554481d70356d29890d44398aec3b52a0484b32a7e25c487ee81e/pipenv-2025.0.3.tar.gz"
-    source = "https://files.pythonhosted.org/packages/59/ca/397e375554481d70356d29890d44398aec3b52a0484b32a7e25c487ee81e/pipenv-2025.0.3.tar.gz"
-    source-checksum = "sha256:f0a67aa928824e61003d52acea72a94b180800019f03d38a311966f6330bc8d1"
+    purl = "pkg:generic/pipenv@2026.0.2?checksum=19aa881e98513852c5133ac5a2d898d2546654d062f7f524ed8e0f8f222c98b5&download_url=https://files.pythonhosted.org/packages/d8/6c/41efe0b9417023d460049c881aae5860f37a0018b52dcd4d954bc5a57ea2/pipenv-2026.0.2.tar.gz"
+    source = "https://files.pythonhosted.org/packages/d8/6c/41efe0b9417023d460049c881aae5860f37a0018b52dcd4d954bc5a57ea2/pipenv-2026.0.2.tar.gz"
+    source-checksum = "sha256:19aa881e98513852c5133ac5a2d898d2546654d062f7f524ed8e0f8f222c98b5"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/59/ca/397e375554481d70356d29890d44398aec3b52a0484b32a7e25c487ee81e/pipenv-2025.0.3.tar.gz"
-    version = "2025.0.3"
+    uri = "https://files.pythonhosted.org/packages/d8/6c/41efe0b9417023d460049c881aae5860f37a0018b52dcd4d954bc5a57ea2/pipenv-2026.0.2.tar.gz"
+    version = "2026.0.2"
 
   [[metadata.dependencies]]
-    checksum = "sha256:36fc2a7841ccdb2f58a9f787b296c2e15dea3b5b79b84d4071812f28b7e8d7a2"
-    cpe = "cpe:2.3:a:python-pipenv:pipenv:2025.0.4:*:*:*:*:python:*:*"
+    checksum = "sha256:9a39d13a41ed8e4368ad50620941191f357319c8ffb7df45875c7c5dc6604ff6"
+    cpe = "cpe:2.3:a:python-pipenv:pipenv:2026.0.3:*:*:*:*:python:*:*"
     id = "pipenv"
     licenses = ["MIT", "MIT-0"]
     name = "Pipenv"
-    purl = "pkg:generic/pipenv@2025.0.4?checksum=36fc2a7841ccdb2f58a9f787b296c2e15dea3b5b79b84d4071812f28b7e8d7a2&download_url=https://files.pythonhosted.org/packages/3b/15/4c869c2ec2819f8e6529cc26a044c9f7c714246c972b9b2cbbafda0847f9/pipenv-2025.0.4.tar.gz"
-    source = "https://files.pythonhosted.org/packages/3b/15/4c869c2ec2819f8e6529cc26a044c9f7c714246c972b9b2cbbafda0847f9/pipenv-2025.0.4.tar.gz"
-    source-checksum = "sha256:36fc2a7841ccdb2f58a9f787b296c2e15dea3b5b79b84d4071812f28b7e8d7a2"
+    purl = "pkg:generic/pipenv@2026.0.3?checksum=9a39d13a41ed8e4368ad50620941191f357319c8ffb7df45875c7c5dc6604ff6&download_url=https://files.pythonhosted.org/packages/90/03/8958464e0d366530477f07fd041ef6b9df56f3ea9c56d0db24cc8cd87fff/pipenv-2026.0.3.tar.gz"
+    source = "https://files.pythonhosted.org/packages/90/03/8958464e0d366530477f07fd041ef6b9df56f3ea9c56d0db24cc8cd87fff/pipenv-2026.0.3.tar.gz"
+    source-checksum = "sha256:9a39d13a41ed8e4368ad50620941191f357319c8ffb7df45875c7c5dc6604ff6"
     stacks = ["*"]
-    uri = "https://files.pythonhosted.org/packages/3b/15/4c869c2ec2819f8e6529cc26a044c9f7c714246c972b9b2cbbafda0847f9/pipenv-2025.0.4.tar.gz"
-    version = "2025.0.4"
+    uri = "https://files.pythonhosted.org/packages/90/03/8958464e0d366530477f07fd041ef6b9df56f3ea9c56d0db24cc8cd87fff/pipenv-2026.0.3.tar.gz"
+    version = "2026.0.3"
 
-  [[metadata.dependency-constraints]]
-    constraint = "*"
-    id = "pipenv"
-    patches = 2
-
-  # poetry
   [[metadata.dependencies]]
     checksum = "sha256:796e2866f35cb57af36280a890f5a5b3f9ef1a2dcf780b945b02be2e82895391"
     cpe = "cpe:2.3:a:python-poetry:poetry:1.7.0:*:*:*:*:python:*:*"
@@ -241,6 +264,34 @@ api = "0.8"
     uri = "https://files.pythonhosted.org/packages/57/a6/28b83bb81911dc5b2a6a2be4006cceb29b0915b2f62d2e44192e315c2456/poetry-2.2.0.tar.gz"
     version = "2.2.0"
 
+  [[metadata.dependencies]]
+    checksum = "sha256:bef9aa4bb00ce4c10b28b25e7bac724094802d6958190762c45df6c12749b37c"
+    cpe = "cpe:2.3:a:python-poetry:poetry:2.2.1:*:*:*:*:python:*:*"
+    id = "poetry"
+    licenses = ["MIT"]
+    name = "Poetry"
+    purl = "pkg:generic/poetry@2.2.1?checksum=bef9aa4bb00ce4c10b28b25e7bac724094802d6958190762c45df6c12749b37c&download_url=https://files.pythonhosted.org/packages/19/28/f790e21769afaaa1f326d9634f9a5c700c4cdb4c468a1707c6db0b350505/poetry-2.2.1.tar.gz"
+    source = "https://files.pythonhosted.org/packages/19/28/f790e21769afaaa1f326d9634f9a5c700c4cdb4c468a1707c6db0b350505/poetry-2.2.1.tar.gz"
+    source-checksum = "sha256:bef9aa4bb00ce4c10b28b25e7bac724094802d6958190762c45df6c12749b37c"
+    stacks = ["*"]
+    uri = "https://files.pythonhosted.org/packages/19/28/f790e21769afaaa1f326d9634f9a5c700c4cdb4c468a1707c6db0b350505/poetry-2.2.1.tar.gz"
+    version = "2.2.1"
+
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "miniconda3"
+    patches = 4
+
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "pip"
+    patches = 2
+
+  [[metadata.dependency-constraints]]
+    constraint = "*"
+    id = "pipenv"
+    patches = 2
+
   [[metadata.dependency-constraints]]
     constraint = "1.7.*"
     id = "poetry"
@@ -265,59 +316,6 @@ api = "0.8"
     constraint = "2.2.*"
     id = "poetry"
     patches = 2
-
-  # uv
-  [[metadata.dependencies]]
-    arch = "amd64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.21:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.21/uv-x86_64-unknown-linux-gnu.tar.gz"
-    sha256 = "0a1ab27383c28ef1c041f85cbbc609d8e3752dfb4b238d2ad97b208a52232baf"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.21/source.tar.gz"
-    sha256_source = "4b0a5505280424dbde3e1c55203c4106f802d5c031a899a9d87e2256bc783cf0"
-    stacks = ["*"]
-    version = "0.9.21"
-
-  [[metadata.dependencies]]
-    arch = "arm64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.21:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.21/uv-aarch64-unknown-linux-gnu.tar.gz"
-    sha256 = "416984484783a357170c43f98e7d2d203f1fb595d6b3b95131513c53e50986ef"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.21/source.tar.gz"
-    sha256_source = "4b0a5505280424dbde3e1c55203c4106f802d5c031a899a9d87e2256bc783cf0"
-    stacks = ["*"]
-    version = "0.9.21"
-
-  [[metadata.dependencies]]
-    arch = "amd64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-x86_64-unknown-linux-gnu.tar.gz"
-    sha256 = "e170aed70ac0225feee612e855d3a57ae73c61ffb22c7e52c3fd33b87c286508"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
-    sha256_source = "0c683fac23fc414505adce589adf642d710798b691321672de554443b6938c6e"
-    stacks = ["*"]
-    version = "0.9.22"
-
-  [[metadata.dependencies]]
-    arch = "arm64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-aarch64-unknown-linux-gnu.tar.gz"
-    sha256 = "2f8716c407d5da21b8a3e8609ed358147216aaab28b96b1d6d7f48e9bcc6254e"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
-    sha256_source = "0c683fac23fc414505adce589adf642d710798b691321672de554443b6938c6e"
-    stacks = ["*"]
-    version = "0.9.22"
 
   [[metadata.dependency-constraints]]
     constraint = "*"
