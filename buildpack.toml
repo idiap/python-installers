@@ -266,6 +266,11 @@ api = "0.8"
     id = "poetry"
     patches = 2
 
+  [[metadata.dependency-constraints]]
+    constraint = "2.3.*"
+    id = "poetry"
+    patches = 2
+
   # uv
   [[metadata.dependencies]]
     arch = "amd64"
@@ -321,7 +326,7 @@ api = "0.8"
 
   [[metadata.dependency-constraints]]
     constraint = "*"
-    id = "python-uv"
+    id = "uv"
     patches = 2
 
 [[stacks]]
