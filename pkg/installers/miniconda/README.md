@@ -12,12 +12,6 @@ Original implementation from `paketo-buildpack/miniconda`
 This sub-package installs miniconda into a layer and makes it available on the
 PATH.
 
-## Configuration
-
-|  Environment Variable  | Description                                                      |
-|------------------------|------------------------------------------------------------------|
-| `$BP_MINICONDA_SOLVER` | Configure the solver to be used (current valid value is `mamba`) |
-
 ## Integration
 
 The Miniconda CNB provides conda as a dependency. Downstream buildpacks can
