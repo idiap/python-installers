@@ -6,6 +6,8 @@
 package pythoninstallers
 
 import (
+	"slices"
+
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
@@ -36,9 +38,15 @@ func Build(
 
 		orderedInstallers := []string{pip.Pip, pipenv.Pipenv, poetry.PoetryDependency, miniconda.Conda, uv.Uv}
 
+		doneInstallers := []string{}
+
 		for _, installer := range orderedInstallers {
 			for _, entry := range context.Plan.Entries {
+				if slices.Contains(doneInstallers, entry.Name) {
+					continue
+				}
 				if entry.Name == installer {
+					doneInstallers = append(doneInstallers, entry.Name)
 					logger.Title("Handling %s", entry.Name)
 					parameters, ok := buildParameters[entry.Name]
 
