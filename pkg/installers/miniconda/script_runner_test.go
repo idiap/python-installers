@@ -62,6 +62,7 @@ func testScriptRunner(t *testing.T, context spec.G, it spec.S) {
 				filepath.Join(scriptDir, "artifact"),
 				"-b",
 				"-f",
+				"-u",
 				"-p", layersDir,
 			}))
 		})

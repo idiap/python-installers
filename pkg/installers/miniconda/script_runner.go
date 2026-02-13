@@ -37,6 +37,7 @@ func (s ScriptRunner) Run(runPath, condaLayerPath string) error {
 			runPath,
 			"-b",
 			"-f",
+			"-u",
 			"-p", condaLayerPath,
 		},
 	})
