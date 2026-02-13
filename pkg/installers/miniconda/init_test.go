@@ -14,7 +14,7 @@ import (
 func TestUnit(t *testing.T) {
 	suite := spec.New("miniconda", spec.Report(report.Terminal{}), spec.Parallel())
 	suite("Build", testBuild)
-	suite("Detect", testDetect)
+	suite("Detect", testDetect, spec.Sequential())
 	suite("ScriptRunner", testScriptRunner)
 	suite.Run(t)
 }

@@ -76,11 +76,19 @@ func Build(
 
 		planner := draft.NewPlanner()
 
-		dependency, err := dependencyManager.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), "miniconda3", "*", context.Stack)
+		logger.Process("Resolving Conda version")
+		entry, sortedEntries := planner.Resolve("conda", context.Plan.Entries, Priorities)
+		entry.Name = "miniconda3"
+		logger.Candidates(sortedEntries)
+
+		version, _ := entry.Metadata["version"].(string)
+
+		dependency, err := dependencyManager.Resolve(filepath.Join(context.CNBPath, "buildpack.toml"), entry.Name, version, context.Stack)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
+		logger.SelectedDependency(entry, dependency, clock.Now())
 		legacySBOM := dependencyManager.GenerateBillOfMaterials(dependency)
 
 		condaLayer, err := context.Layers.Get("conda")
@@ -160,11 +168,6 @@ func Build(
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
-		condaLayer.SharedEnv.Append("CONDA_PLUGINS_AUTO_ACCEPT_TOS", "true", ":")
-		condaLayer.Metadata = map[string]interface{}{
-			DepKey: dependencyChecksum,
-		}
-
 		logger.GeneratingSBOM(condaLayer.Path)
 		var sbomContent sbom.SBOM
 		duration, err = clock.Measure(func() error {
@@ -182,6 +185,14 @@ func Build(
 		condaLayer.SBOM, err = sbomContent.InFormats(context.BuildpackInfo.SBOMFormats...)
 		if err != nil {
 			return packit.BuildResult{}, err
+		}
+
+		condaLayer.SharedEnv.Append("CONDA_PLUGINS_AUTO_ACCEPT_TOS", "true", ":")
+
+		logger.EnvironmentVariables(condaLayer)
+
+		condaLayer.Metadata = map[string]interface{}{
+			DepKey: dependencyChecksum,
 		}
 
 		return packit.BuildResult{

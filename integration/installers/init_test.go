@@ -90,9 +90,9 @@ func TestIntegration(t *testing.T) {
 
 	// miniconda
 	suite("Miniconda Default", minicondaTestDefault)
-	suite("Miniconda Logging", minicondaTestLogging)
-	suite("Miniconda LayerReuse", minicondaTestReusingLayerRebuild)
+	suite("Miniconda LayerReuse", minicondaTestLayerReuse)
 	suite("Miniconda TestOffline", minicondaTestOffline)
+	suite("Miniconda Version", minicondaTestVersions, spec.Parallel())
 
 	// pip
 	suite("Pip Default", pipTestDefault, spec.Parallel())

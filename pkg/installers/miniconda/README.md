@@ -12,6 +12,12 @@ Original implementation from `paketo-buildpack/miniconda`
 This sub-package installs miniconda into a layer and makes it available on the
 PATH.
 
+## Configuration
+
+|  Environment Variable  | Description                                                      |
+|------------------------|------------------------------------------------------------------|
+| `$BP_MINICONDA_VERSION` | Configure the version of miniconda to install. Buildpack releases (and the pip versions for each release) can be found [here](https://github.com/idiap/python-installers/releases). |
+
 ## Integration
 
 The Miniconda CNB provides conda as a dependency. Downstream buildpacks can

@@ -74,6 +74,28 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
+			Expect(logs).To(ContainLines(
+				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
+				"  Resolving Conda version",
+				"    Candidate version sources (in priority order):",
+				"      <unknown> -> \"\"",
+			))
+			Expect(logs).To(ContainLines(
+				MatchRegexp(`    Selected Miniconda.sh version \(using <unknown>\): \d+\.\d+\.\d+`),
+			))
+			Expect(logs).To(ContainLines(
+				"  Executing build process",
+				MatchRegexp(`    Installing Miniconda \d+\.\d+\.\d+`),
+				MatchRegexp(`      Completed in \d+(\.?\d+)*`),
+			))
+			Expect(logs).To(ContainLines(
+				"  Configuring build environment",
+				`    CONDA_PLUGINS_AUTO_ACCEPT_TOS -> "$CONDA_PLUGINS_AUTO_ACCEPT_TOS:true"`,
+				"",
+				"  Configuring launch environment",
+				`    CONDA_PLUGINS_AUTO_ACCEPT_TOS -> "$CONDA_PLUGINS_AUTO_ACCEPT_TOS:true"`,
+			))
+
 			container, err = docker.Container.Run.
 				WithCommand("conda info").
 				WithPublish("8080").
