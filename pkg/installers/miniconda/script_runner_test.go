@@ -75,7 +75,7 @@ func testScriptRunner(t *testing.T, context spec.G, it spec.S) {
 
 				it("returns an error", func() {
 					err := scriptRunner.Run(scriptPath, layersDir)
-					Expect(err).To(MatchError("failed while running miniconda install script: script failed to run"))
+					Expect(err).To(MatchError("failed while running miniconda install script:\n\nerror: script failed to run"))
 				})
 			})
 		})
