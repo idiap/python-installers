@@ -173,6 +173,7 @@ func Build(
 				buffer := bytes.NewBuffer(nil)
 				err := conda.Execute(pexec.Execution{
 					Args:   []string{"install", "-n", "base", "conda-libmamba-solver", "-y"},
+					Env:    append(os.Environ(), "CONDA_PLUGINS_AUTO_ACCEPT_TOS=true"),
 					Stdout: buffer,
 					Stderr: buffer,
 				})
@@ -203,6 +204,7 @@ func Build(
 
 		}
 
+		condaLayer.SharedEnv.Append("CONDA_PLUGINS_AUTO_ACCEPT_TOS", "true", ":")
 		condaLayer.Metadata = map[string]interface{}{
 			DepKey: dependencyChecksum,
 		}
