@@ -5,6 +5,8 @@
 package miniconda
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -168,9 +170,17 @@ func Build(
 
 			conda := pexec.NewExecutable(condaLayer.Path + "/bin/conda")
 			duration, err = clock.Measure(func() error {
-				return conda.Execute(pexec.Execution{
-					Args: []string{"install", "-n", "base", "conda-libmamba-solver", "-y"},
+				buffer := bytes.NewBuffer(nil)
+				err := conda.Execute(pexec.Execution{
+					Args:   []string{"install", "-n", "base", "conda-libmamba-solver", "-y"},
+					Env:    append(os.Environ(), "CONDA_PLUGINS_AUTO_ACCEPT_TOS=true"),
+					Stdout: buffer,
+					Stderr: buffer,
 				})
+				if err != nil {
+					return fmt.Errorf("failed to setup solver:\n%s\nerror: %w", buffer.String(), err)
+				}
+				return nil
 			})
 			if err != nil {
 				return packit.BuildResult{}, err
@@ -194,6 +204,7 @@ func Build(
 
 		}
 
+		condaLayer.SharedEnv.Append("CONDA_PLUGINS_AUTO_ACCEPT_TOS", "true", ":")
 		condaLayer.Metadata = map[string]interface{}{
 			DepKey: dependencyChecksum,
 		}

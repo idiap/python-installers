@@ -131,7 +131,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.Name).To(Equal("conda"))
 		Expect(layer.Path).To(Equal(filepath.Join(layersDir, "conda")))
 
-		Expect(layer.SharedEnv).To(BeEmpty())
+		Expect(layer.SharedEnv).To(HaveLen(2))
+		Expect(layer.SharedEnv["CONDA_PLUGINS_AUTO_ACCEPT_TOS.delim"]).To(Equal(":"))
+		Expect(layer.SharedEnv["CONDA_PLUGINS_AUTO_ACCEPT_TOS.append"]).To(Equal("true"))
+
 		Expect(layer.BuildEnv).To(BeEmpty())
 		Expect(layer.LaunchEnv).To(BeEmpty())
 		Expect(layer.ProcessLaunchEnv).To(BeEmpty())

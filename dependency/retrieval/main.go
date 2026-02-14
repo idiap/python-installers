@@ -332,7 +332,7 @@ func generateMinicondaMetadata(versionFetcher versionology.VersionFetcher) ([]ve
 		Checksum:       fmt.Sprintf("sha256:%s", minicondaRelease.BinarySHA256),
 		ID:             "miniconda3",
 		Licenses:       licenseIDsAsInterface,
-		Name:           "Miniconda3.sh",
+		Name:           "Miniconda.sh",
 		OS:             "linux",
 		Arch:           minicondaRelease.Arch,
 		PURL:           retrieve.GeneratePURL("miniconda3", version, minicondaRelease.SourceSHA256, minicondaRelease.SourceURL),

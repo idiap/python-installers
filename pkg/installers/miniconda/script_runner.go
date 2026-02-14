@@ -5,6 +5,7 @@
 package miniconda
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/paketo-buildpacks/packit/v2/pexec"
@@ -32,16 +33,20 @@ func NewScriptRunner(executable Executable) ScriptRunner {
 // Run invokes the miniconda script located in the given runPath, which
 // installs conda into the a layer path designated by condaLayerPath.
 func (s ScriptRunner) Run(runPath, condaLayerPath string) error {
+	buffer := bytes.NewBuffer(nil)
 	err := s.executable.Execute(pexec.Execution{
 		Args: []string{
 			runPath,
 			"-b",
 			"-f",
+			"-u",
 			"-p", condaLayerPath,
 		},
+		Stdout: buffer,
+		Stderr: buffer,
 	})
 	if err != nil {
-		return fmt.Errorf("failed while running miniconda install script: %w", err)
+		return fmt.Errorf("failed while running miniconda install script:\n%s\nerror: %w", buffer.String(), err)
 	}
 
 	return nil
