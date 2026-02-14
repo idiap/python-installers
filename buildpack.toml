@@ -277,6 +277,86 @@ api = "0.8"
     uri = "https://files.pythonhosted.org/packages/19/28/f790e21769afaaa1f326d9634f9a5c700c4cdb4c468a1707c6db0b350505/poetry-2.2.1.tar.gz"
     version = "2.2.1"
 
+  [[metadata.dependencies]]
+    checksum = "sha256:423cbccfe3533155ce9f49e929780a1386e564b2d97d2380664ea388cfe1191c"
+    cpe = "cpe:2.3:a:python-poetry:poetry:2.3.1:*:*:*:*:python:*:*"
+    id = "poetry"
+    licenses = ["MIT"]
+    name = "Poetry"
+    purl = "pkg:generic/poetry@2.3.1?checksum=423cbccfe3533155ce9f49e929780a1386e564b2d97d2380664ea388cfe1191c&download_url=https://files.pythonhosted.org/packages/f0/c1/1cafdad3dae01aa5693339809847d89cd1379d1dff0329da7d791a2db5c4/poetry-2.3.1.tar.gz"
+    source = "https://files.pythonhosted.org/packages/f0/c1/1cafdad3dae01aa5693339809847d89cd1379d1dff0329da7d791a2db5c4/poetry-2.3.1.tar.gz"
+    source-checksum = "sha256:423cbccfe3533155ce9f49e929780a1386e564b2d97d2380664ea388cfe1191c"
+    stacks = ["*"]
+    uri = "https://files.pythonhosted.org/packages/f0/c1/1cafdad3dae01aa5693339809847d89cd1379d1dff0329da7d791a2db5c4/poetry-2.3.1.tar.gz"
+    version = "2.3.1"
+
+  [[metadata.dependencies]]
+    checksum = "sha256:6e81526ae99a4f07f75174600bfe8b73e74c786dc18c9d1ce1800dd6f807414b"
+    cpe = "cpe:2.3:a:python-poetry:poetry:2.3.2:*:*:*:*:python:*:*"
+    id = "poetry"
+    licenses = ["MIT"]
+    name = "Poetry"
+    purl = "pkg:generic/poetry@2.3.2?checksum=6e81526ae99a4f07f75174600bfe8b73e74c786dc18c9d1ce1800dd6f807414b&download_url=https://files.pythonhosted.org/packages/7d/b7/4c242ff85f6263f411060336ef7370e444b1718de1122d0c145e92170b01/poetry-2.3.2.tar.gz"
+    source = "https://files.pythonhosted.org/packages/7d/b7/4c242ff85f6263f411060336ef7370e444b1718de1122d0c145e92170b01/poetry-2.3.2.tar.gz"
+    source-checksum = "sha256:6e81526ae99a4f07f75174600bfe8b73e74c786dc18c9d1ce1800dd6f807414b"
+    stacks = ["*"]
+    uri = "https://files.pythonhosted.org/packages/7d/b7/4c242ff85f6263f411060336ef7370e444b1718de1122d0c145e92170b01/poetry-2.3.2.tar.gz"
+    version = "2.3.2"
+
+  [[metadata.dependencies]]
+    arch = "amd64"
+    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
+    id = "uv"
+    name = "uv"
+    os = "linux"
+    sha256 = "e170aed70ac0225feee612e855d3a57ae73c61ffb22c7e52c3fd33b87c286508"
+    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
+    stacks = ["*"]
+    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-x86_64-unknown-linux-gnu.tar.gz"
+    version = "0.9.22"
+
+  [[metadata.dependencies]]
+    arch = "arm64"
+    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
+    id = "uv"
+    name = "uv"
+    os = "linux"
+    sha256 = "2f8716c407d5da21b8a3e8609ed358147216aaab28b96b1d6d7f48e9bcc6254e"
+    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
+    stacks = ["*"]
+    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-aarch64-unknown-linux-gnu.tar.gz"
+    version = "0.9.22"
+
+  [[metadata.dependencies]]
+    arch = "amd64"
+    checksum = "sha256:6aa4576c31f791c0b9d4739e256d07358d45e7535695287fec03cf6839e25512"
+    cpe = "cpe:2.3:a:uv:uv:0.10.2:*:*:*:*:python:*:*"
+    id = "uv"
+    licenses = ["Apache-2.0", "MIT"]
+    name = "uv"
+    os = "linux"
+    purl = "pkg:generic/uv@0.10.2?checksum=sha256:56c90e5b82b013bc738c32ea1923c44a04659f60c46d931db905a542d2869229&download_url=https://github.com/astral-sh/uv/releases/download/0.10.2/source.tar.gz"
+    source = "https://github.com/astral-sh/uv/releases/download/0.10.2/source.tar.gz"
+    source-checksum = "sha256:56c90e5b82b013bc738c32ea1923c44a04659f60c46d931db905a542d2869229"
+    stacks = ["*"]
+    uri = "https://github.com/astral-sh/uv/releases/download/0.10.2/uv-x86_64-unknown-linux-gnu.tar.gz"
+    version = "0.10.2"
+
+  [[metadata.dependencies]]
+    arch = "arm64"
+    checksum = "sha256:4998f545234d52fc6f1280827d392f00a9278295050d59c53a776546dbf0124d"
+    cpe = "cpe:2.3:a:uv:uv:0.10.2:*:*:*:*:python:*:*"
+    id = "uv"
+    licenses = ["Apache-2.0", "MIT"]
+    name = "uv"
+    os = "linux"
+    purl = "pkg:generic/uv@0.10.2?checksum=sha256:56c90e5b82b013bc738c32ea1923c44a04659f60c46d931db905a542d2869229&download_url=https://github.com/astral-sh/uv/releases/download/0.10.2/source.tar.gz"
+    source = "https://github.com/astral-sh/uv/releases/download/0.10.2/source.tar.gz"
+    source-checksum = "sha256:56c90e5b82b013bc738c32ea1923c44a04659f60c46d931db905a542d2869229"
+    stacks = ["*"]
+    uri = "https://github.com/astral-sh/uv/releases/download/0.10.2/uv-aarch64-unknown-linux-gnu.tar.gz"
+    version = "0.10.2"
+
   [[metadata.dependency-constraints]]
     constraint = "*"
     id = "miniconda3"
@@ -321,59 +401,6 @@ api = "0.8"
     constraint = "2.3.*"
     id = "poetry"
     patches = 2
-
-  # uv
-  [[metadata.dependencies]]
-    arch = "amd64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.21:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.21/uv-x86_64-unknown-linux-gnu.tar.gz"
-    sha256 = "0a1ab27383c28ef1c041f85cbbc609d8e3752dfb4b238d2ad97b208a52232baf"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.21/source.tar.gz"
-    sha256_source = "4b0a5505280424dbde3e1c55203c4106f802d5c031a899a9d87e2256bc783cf0"
-    stacks = ["*"]
-    version = "0.9.21"
-
-  [[metadata.dependencies]]
-    arch = "arm64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.21:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.21/uv-aarch64-unknown-linux-gnu.tar.gz"
-    sha256 = "416984484783a357170c43f98e7d2d203f1fb595d6b3b95131513c53e50986ef"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.21/source.tar.gz"
-    sha256_source = "4b0a5505280424dbde3e1c55203c4106f802d5c031a899a9d87e2256bc783cf0"
-    stacks = ["*"]
-    version = "0.9.21"
-
-  [[metadata.dependencies]]
-    arch = "amd64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-x86_64-unknown-linux-gnu.tar.gz"
-    sha256 = "e170aed70ac0225feee612e855d3a57ae73c61ffb22c7e52c3fd33b87c286508"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
-    sha256_source = "0c683fac23fc414505adce589adf642d710798b691321672de554443b6938c6e"
-    stacks = ["*"]
-    version = "0.9.22"
-
-  [[metadata.dependencies]]
-    arch = "arm64"
-    os = "linux"
-    cpe = "cpe:2.3:a:uv:uv:0.9.22:*:*:*:*:python:*:*"
-    id = "uv"
-    name = "uv"
-    uri = "https://github.com/astral-sh/uv/releases/download/0.9.22/uv-aarch64-unknown-linux-gnu.tar.gz"
-    sha256 = "2f8716c407d5da21b8a3e8609ed358147216aaab28b96b1d6d7f48e9bcc6254e"
-    source = "https://github.com/astral-sh/uv/releases/download/0.9.22/source.tar.gz"
-    sha256_source = "0c683fac23fc414505adce589adf642d710798b691321672de554443b6938c6e"
-    stacks = ["*"]
-    version = "0.9.22"
 
   [[metadata.dependency-constraints]]
     constraint = "*"
