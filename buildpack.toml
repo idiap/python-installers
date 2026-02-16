@@ -19,10 +19,10 @@ api = "0.8"
     id = "miniconda3"
     name = "Miniconda.sh"
     os = "linux"
-    sha256 = "b40682cedf1e1755c02555f8d3d98aadb4607a68da7caf72a9bbe1fb9ae0b904"
+    sha256 = "2d94390e8858c72f6a28080954fd640ae4449d08d7b9d4ff8c94ad39beaf5f46"
     source = "https://github.com/conda/conda/archive/refs/tags/25.3.1.tar.gz"
     stacks = ["*"]
-    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-x86_64.sh"
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.3.1-1-Linux-x86_64.sh"
     version = "25.3.1"
 
   [[metadata.dependencies]]
@@ -31,10 +31,10 @@ api = "0.8"
     id = "miniconda3"
     name = "Miniconda.sh"
     os = "linux"
-    sha256 = "5afee04df06c923462341cfc87727100a67fa854550d0d7a2e6295005168e6b7"
+    sha256 = "435f9b5640716dd770e9abe404c54db7d3493cb61a814c5de1fe345ea017d4a6"
     source = "https://github.com/conda/conda/archive/refs/tags/25.3.1.tar.gz"
     stacks = ["*"]
-    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.1.1-2-Linux-aarch64.sh"
+    uri = "https://repo.anaconda.com/miniconda/Miniconda3-py39_25.3.1-1-Linux-aarch64.sh"
     version = "25.3.1"
 
   [[metadata.dependencies]]
