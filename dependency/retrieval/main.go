@@ -371,7 +371,7 @@ func (release GitHubRelease) Version() *semver.Version {
 func getGitHubVersions(org string, project string, archAsset string) (versionology.VersionFetcherArray, error) {
 	client := github.NewClient(nil)
 
-	opt := &github.ListOptions{Page: 1, PerPage: 2}
+	opt := &github.ListOptions{Page: 1, PerPage: 4}
 	releases, _, err := client.Repositories.ListReleases(context.Background(), org, project, opt)
 
 	if err != nil {

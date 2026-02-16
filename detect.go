@@ -12,6 +12,7 @@ import (
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
+	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 )
@@ -61,6 +62,14 @@ func Detect(logger scribe.Emitter, pyProjectParser poetry.PyProjectParser) packi
 
 		if err == nil {
 			plans = append(plans, uvResult.Plan)
+		} else {
+			logger.Detail("%s", err)
+		}
+
+		pixiResult, err := pixi.Detect()(context)
+
+		if err == nil {
+			plans = append(plans, pixiResult.Plan)
 		} else {
 			logger.Detail("%s", err)
 		}

@@ -20,6 +20,7 @@ import (
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
+	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
@@ -242,6 +243,29 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					packit.BuildPlan{
 						Provides: []packit.BuildPlanProvision{
 							{Name: uv.Uv},
+						},
+					},
+				)
+
+				Expect(err).NotTo(HaveOccurred())
+				Expect(result.Plan).To(Equal(pythoninstallers.Or(withUv...)))
+			})
+		})
+
+		context("with pixi.lock", func() {
+			it.Before(func() {
+				Expect(os.WriteFile(filepath.Join(workingDir, pixi.LockfileName), []byte(""), os.ModePerm)).To(Succeed())
+			})
+
+			it("passes detection", func() {
+				result, err := detect(packit.DetectContext{
+					WorkingDir: workingDir,
+				})
+
+				withUv := append(plans,
+					packit.BuildPlan{
+						Provides: []packit.BuildPlanProvision{
+							{Name: pixi.Pixi},
 						},
 					},
 				)

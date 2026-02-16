@@ -20,6 +20,7 @@ import (
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
+	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 )
@@ -56,6 +57,10 @@ func main() {
 		uv.Uv: uv.UvBuildParameters{
 			DependencyManager: postal.NewService(cargo.NewTransport()),
 			InstallProcess:    uv.NewUvInstallProcess(),
+		},
+		pixi.Pixi: pixi.PixiBuildParameters{
+			DependencyManager: postal.NewService(cargo.NewTransport()),
+			InstallProcess:    pixi.NewPixiInstallProcess(),
 		},
 	}
 
