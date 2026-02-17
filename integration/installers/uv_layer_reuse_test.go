@@ -64,8 +64,8 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})
 
-	context("when the app is rebuilt and the same pip version is required", func() {
-		it("reuses the cached pip layer", func() {
+	context("when the app is rebuilt and the same uv version is required", func() {
+		it("reuses the cached uv layer", func() {
 			var (
 				err  error
 				logs fmt.Stringer

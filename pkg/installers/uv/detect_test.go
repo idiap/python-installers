@@ -63,7 +63,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			t.Setenv("BP_UV_VERSION", "some-version")
 		})
 
-		it("returns a plan that requires that version of poetry", func() {
+		it("returns a plan that requires that version of uv", func() {
 			result, err := detect(packit.DetectContext{
 				WorkingDir: workingDir,
 			})

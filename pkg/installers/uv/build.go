@@ -30,7 +30,7 @@ type DependencyManager interface {
 	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
 }
 
-// InstallProcess defines the interface for installing the poetry dependency into a layer.
+// InstallProcess defines the interface for installing the uv dependency into a layer.
 type InstallProcess interface {
 	Execute(sourcePath, targetLayerPath, dependencyName string) error
 }
