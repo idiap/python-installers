@@ -20,7 +20,7 @@ import (
 	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
 )
 
-func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
+func pixiTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
@@ -46,7 +46,7 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		imageIDs = map[string]struct{}{}
 		containerIDs = map[string]struct{}{}
 
-		source, err = occam.Source(filepath.Join("testdata", "uv", "uv_app"))
+		source, err = occam.Source(filepath.Join("testdata", "pixi", "pixi_app"))
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -64,8 +64,8 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})
 
-	context("when the app is rebuilt and the same uv version is required", func() {
-		it("reuses the cached uv layer", func() {
+	context("when the app is rebuilt and the same pixi version is required", func() {
+		it("reuses the cached pixi layer", func() {
 			var (
 				err  error
 				logs fmt.Stringer
@@ -88,7 +88,7 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			imageIDs[firstImage.ID] = struct{}{}
 			firstContainer, err = docker.Container.Run.
-				WithCommand("uv --version").
+				WithCommand("pixi --version").
 				Execute(firstImage.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -107,19 +107,19 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Resolving uv version",
+				"  Resolving pixi version",
 				"    Candidate version sources (in priority order):",
 				"      <unknown> -> \"\"",
 			))
 			Expect(logs).To(ContainLines(
-				MatchRegexp(`    Selected uv version \(using <unknown>\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected pixi version \(using <unknown>\): \d+\.\d+\.\d+`),
 			))
 			Expect(logs).To(ContainLines(
-				fmt.Sprintf("  Reusing cached layer /layers/%s/uv", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
+				fmt.Sprintf("  Reusing cached layer /layers/%s/pixi", strings.ReplaceAll(buildpackInfo.Buildpack.ID, "/", "_")),
 			))
 
 			secondContainer, err = docker.Container.Run.
-				WithCommand("uv --version").
+				WithCommand("pixi --version").
 				Execute(secondImage.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -129,14 +129,14 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(secondContainer.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(MatchRegexp(`uv \d+\.\d+(\.\d+)?.*`))
+			}).Should(MatchRegexp(`pixi \d+\.\d+(\.\d+)?.*`))
 
 			Expect(secondImage.Buildpacks[0].Key).To(Equal(buildpackInfo.Buildpack.ID))
-			Expect(secondImage.Buildpacks[0].Layers["uv"].SHA).To(Equal(firstImage.Buildpacks[0].Layers["uv"].SHA))
+			Expect(secondImage.Buildpacks[0].Layers["pixi"].SHA).To(Equal(firstImage.Buildpacks[0].Layers["pixi"].SHA))
 		})
 	})
 
-	context("when the app is rebuilt and a different uv version is required", func() {
+	context("when the app is rebuilt and a different pixi version is required", func() {
 		it("rebuilds", func() {
 			var (
 				err  error
@@ -149,7 +149,7 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				secondContainer occam.Container
 			)
 
-			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "uv")
+			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "pixi")
 
 			firstImage, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
@@ -157,13 +157,13 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_UV_VERSION": dependencies[0].Version}).
+				WithEnv(map[string]string{"BP_PIXI_VERSION": dependencies[0].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			imageIDs[firstImage.ID] = struct{}{}
 			firstContainer, err = docker.Container.Run.
-				WithCommand("uv --version").
+				WithCommand("pixi --version").
 				Execute(firstImage.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -175,7 +175,7 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_UV_VERSION": dependencies[2].Version}).
+				WithEnv(map[string]string{"BP_PIXI_VERSION": dependencies[2].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -183,22 +183,22 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(logs).To(ContainLines(
 				MatchRegexp(fmt.Sprintf(`%s \d+\.\d+\.\d+`, buildpackInfo.Buildpack.Name)),
-				"  Resolving uv version",
+				"  Resolving pixi version",
 				"    Candidate version sources (in priority order):",
-				MatchRegexp(`      BP_UV_VERSION -> "\d+\.\d+\.\d+"`),
-				"      <unknown>     -> \"\"",
+				MatchRegexp(`      BP_PIXI_VERSION -> "\d+\.\d+\.\d+"`),
+				"      <unknown>       -> \"\"",
 			))
 			Expect(logs).To(ContainLines(
-				MatchRegexp(`    Selected uv version \(using BP_UV_VERSION\): \d+\.\d+\.\d+`),
+				MatchRegexp(`    Selected pixi version \(using BP_PIXI_VERSION\): \d+\.\d+\.\d+`),
 			))
 			Expect(logs).To(ContainLines(
 				"  Executing build process",
-				MatchRegexp(`    Installing uv \d+\.\d+\.\d+`),
+				MatchRegexp(`    Installing pixi \d+\.\d+\.\d+`),
 				MatchRegexp(`      Completed in \d+(\.?\d+)*`),
 			))
 
 			secondContainer, err = docker.Container.Run.
-				WithCommand("uv --version").
+				WithCommand("pixi --version").
 				Execute(secondImage.ID)
 			Expect(err).ToNot(HaveOccurred())
 
@@ -208,10 +208,10 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				cLogs, err := docker.Container.Logs.Execute(secondContainer.ID)
 				Expect(err).NotTo(HaveOccurred())
 				return cLogs.String()
-			}).Should(MatchRegexp(`uv \d+\.\d+(\.\d+)?.*`))
+			}).Should(MatchRegexp(`pixi \d+\.\d+(\.\d+)?.*`))
 
 			Expect(secondImage.Buildpacks[0].Key).To(Equal(buildpackInfo.Buildpack.ID))
-			Expect(secondImage.Buildpacks[0].Layers["uv"].SHA).ToNot(Equal(firstImage.Buildpacks[0].Layers["uv"].SHA))
+			Expect(secondImage.Buildpacks[0].Layers["pixi"].SHA).ToNot(Equal(firstImage.Buildpacks[0].Layers["pixi"].SHA))
 		})
 	})
 }

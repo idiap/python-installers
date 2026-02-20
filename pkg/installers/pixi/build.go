@@ -1,9 +1,9 @@
-// SPDX-FileCopyrightText: © 2025 Idiap Research Institute <contact@idiap.ch>
+// SPDX-FileCopyrightText: © 2026 Idiap Research Institute <contact@idiap.ch>
 // SPDX-FileContributor: Samuel Gaist <samuel.gaist@idiap.ch>
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package uv
+package pixi
 
 import (
 	"path/filepath"
@@ -30,7 +30,7 @@ type DependencyManager interface {
 	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
 }
 
-// InstallProcess defines the interface for installing the uv dependency into a layer.
+// InstallProcess defines the interface for installing the poetry dependency into a layer.
 type InstallProcess interface {
 	Execute(sourcePath, targetLayerPath, dependencyName string) error
 }
@@ -39,9 +39,9 @@ type SBOMGenerator interface {
 	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
 }
 
-// UvBuildParameters encapsulates the uv specific parameters for the
+// PixiBuildParameters encapsulates the pixi specific parameters for the
 // Build function
-type UvBuildParameters struct {
+type PixiBuildParameters struct {
 	DependencyManager DependencyManager
 	InstallProcess    InstallProcess
 }
@@ -49,12 +49,12 @@ type UvBuildParameters struct {
 // Build will return a packit.BuildFunc that will be invoked during the build
 // phase of the buildpack lifecycle.
 //
-// Build will find the right uv dependency to download, download it
-// into a layer, run the uv-install script to install uv into a separate
+// Build will find the right pixi dependency to download, download it
+// into a layer, run the pixi-install script to install pixi into a separate
 // layer and generate Bill-of-Materials. It also makes use of the checksum of
 // the dependency to reuse the layer when possible.
 func Build(
-	buildParameters UvBuildParameters,
+	buildParameters PixiBuildParameters,
 	parameters pythoninstallers.CommonBuildParameters,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
@@ -68,8 +68,8 @@ func Build(
 
 		planner := draft.NewPlanner()
 
-		logger.Process("Resolving uv version")
-		entry, sortedEntries := planner.Resolve(Uv, context.Plan.Entries, Priorities)
+		logger.Process("Resolving pixi version")
+		entry, sortedEntries := planner.Resolve(Pixi, context.Plan.Entries, Priorities)
 		logger.Candidates(sortedEntries)
 
 		version, _ := entry.Metadata["version"].(string)
@@ -83,12 +83,12 @@ func Build(
 
 		legacySBOM := dependencyManager.GenerateBillOfMaterials(dependency)
 
-		uvLayer, err := context.Layers.Get("uv")
+		pixiLayer, err := context.Layers.Get("pixi")
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		launch, build := planner.MergeLayerTypes("uv", context.Plan.Entries)
+		launch, build := planner.MergeLayerTypes("pixi", context.Plan.Entries)
 
 		var buildMetadata = packit.BuildMetadata{}
 		var launchMetadata = packit.LaunchMetadata{}
@@ -100,7 +100,7 @@ func Build(
 			launchMetadata = packit.LaunchMetadata{BOM: legacySBOM}
 		}
 
-		cachedChecksum, ok := uvLayer.Metadata[DepKey].(string)
+		cachedChecksum, ok := pixiLayer.Metadata[DepKey].(string)
 		dependencyChecksum := dependency.Checksum
 		if dependencyChecksum == "" {
 			//nolint:staticcheck // SHA256 is only a fallback in case Checksum is not present
@@ -108,49 +108,49 @@ func Build(
 		}
 
 		if ok && cachedChecksum != "" && cargo.Checksum(cachedChecksum).MatchString(dependencyChecksum) {
-			logger.Process("Reusing cached layer %s", uvLayer.Path)
+			logger.Process("Reusing cached layer %s", pixiLayer.Path)
 			logger.Break()
 
-			uvLayer.Launch, uvLayer.Build, uvLayer.Cache = launch, build, build
+			pixiLayer.Launch, pixiLayer.Build, pixiLayer.Cache = launch, build, build
 
 			return packit.BuildResult{
-				Layers: []packit.Layer{uvLayer},
+				Layers: []packit.Layer{pixiLayer},
 				Build:  buildMetadata,
 				Launch: launchMetadata,
 			}, nil
 		}
 
-		uvLayer, err = uvLayer.Reset()
+		pixiLayer, err = pixiLayer.Reset()
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		uvLayer.Launch, uvLayer.Build, uvLayer.Cache = launch, build, build
+		pixiLayer.Launch, pixiLayer.Build, pixiLayer.Cache = launch, build, build
 
 		// This temporary layer is created because the path to a deterministic and
 		// easier to make assertions about during testing. Because this layer has
 		// no type set to true the lifecycle will ensure that this layer is
 		// removed.
-		uvScriptTempLayer, err := context.Layers.Get("uv-temp-layer")
+		pixiScriptTempLayer, err := context.Layers.Get("pixi-temp-layer")
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
-		uvScriptTempLayer, err = uvScriptTempLayer.Reset()
+		pixiScriptTempLayer, err = pixiScriptTempLayer.Reset()
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
 		logger.Process("Executing build process")
-		logger.Subprocess("Installing uv %s", dependency.Version)
+		logger.Subprocess("Installing pixi %s", dependency.Version)
 
 		duration, err := clock.Measure(func() error {
-			err := dependencyManager.Deliver(dependency, context.CNBPath, uvScriptTempLayer.Path, context.Platform.Path)
+			err := dependencyManager.Deliver(dependency, context.CNBPath, pixiScriptTempLayer.Path, context.Platform.Path)
 			if err != nil {
 				return err
 			}
 
-			return installProcess.Execute(uvLayer.Path, uvScriptTempLayer.Path, dependency.Arch)
+			return installProcess.Execute(pixiLayer.Path, pixiScriptTempLayer.Path, dependency.Arch)
 		})
 		if err != nil {
 			return packit.BuildResult{}, err
@@ -159,14 +159,14 @@ func Build(
 		logger.Action("Completed in %s", duration.Round(time.Millisecond))
 		logger.Break()
 
-		uvLayer.Metadata = map[string]interface{}{
+		pixiLayer.Metadata = map[string]interface{}{
 			DepKey: dependencyChecksum,
 		}
 
-		logger.GeneratingSBOM(uvLayer.Path)
+		logger.GeneratingSBOM(pixiLayer.Path)
 		var sbomContent sbom.SBOM
 		duration, err = clock.Measure(func() error {
-			sbomContent, err = sbomGenerator.GenerateFromDependency(dependency, uvLayer.Path)
+			sbomContent, err = sbomGenerator.GenerateFromDependency(dependency, pixiLayer.Path)
 			return err
 		})
 		if err != nil {
@@ -177,13 +177,13 @@ func Build(
 		logger.Break()
 
 		logger.FormattingSBOM(context.BuildpackInfo.SBOMFormats...)
-		uvLayer.SBOM, err = sbomContent.InFormats(context.BuildpackInfo.SBOMFormats...)
+		pixiLayer.SBOM, err = sbomContent.InFormats(context.BuildpackInfo.SBOMFormats...)
 		if err != nil {
 			return packit.BuildResult{}, err
 		}
 
 		return packit.BuildResult{
-			Layers: []packit.Layer{uvLayer},
+			Layers: []packit.Layer{pixiLayer},
 			Build:  buildMetadata,
 			Launch: launchMetadata,
 		}, nil

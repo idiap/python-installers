@@ -115,5 +115,10 @@ func TestIntegration(t *testing.T) {
 	suite("uv LayerReuse", uvTestLayerReuse, spec.Parallel())
 	suite("uv Offline", uvTestOffline, spec.Parallel())
 
+	// pixi
+	suite("pixi Default", pixiTestDefault, spec.Parallel())
+	suite("pixi LayerReuse", pixiTestLayerReuse, spec.Parallel())
+	suite("pixi Offline", pixiTestOffline, spec.Parallel())
+
 	suite.Run(t)
 }

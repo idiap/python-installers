@@ -29,6 +29,8 @@ import (
 	pipfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/pip/fakes"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	pipenvfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv/fakes"
+	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
+	pixifakes "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi/fakes"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
@@ -82,6 +84,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		// uv
 		uvDependencyManager *uvfakes.DependencyManager
 		uvInstallProcess    *uvfakes.InstallProcess
+
+		// pixi
+		pixiDependencyManager *pixifakes.DependencyManager
+		pixiInstallProcess    *pixifakes.InstallProcess
 
 		buildParameters pkgcommon.CommonBuildParameters
 
@@ -251,6 +257,34 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		uvInstallProcess = &uvfakes.InstallProcess{}
 
+		// pixi
+		pixiDependencyManager = &pixifakes.DependencyManager{}
+		pixiDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
+			ID:       "pixi",
+			Name:     "pixi-dependency-name",
+			Checksum: "pixi-dependency-sha",
+			Stacks:   []string{"some-stack"},
+			URI:      "pixi-dependency-uri",
+			Version:  "pixi-dependency-version",
+		}
+
+		// Legacy SBOM
+		pixiDependencyManager.GenerateBillOfMaterialsCall.Returns.BOMEntrySlice = []packit.BOMEntry{
+			{
+				Name: "pixi",
+				Metadata: paketosbom.BOMMetadata{
+					Checksum: paketosbom.BOMChecksum{
+						Algorithm: paketosbom.SHA256,
+						Hash:      "pixi-dependency-sha",
+					},
+					URI:     "pixi-dependency-uri",
+					Version: "pixi-dependency-version",
+				},
+			},
+		}
+
+		pixiInstallProcess = &pixifakes.InstallProcess{}
+
 		buildParameters = pkgcommon.CommonBuildParameters{
 			SbomGenerator: pkgcommon.Generator{},
 			Clock:         chronos.DefaultClock,
@@ -271,6 +305,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				DependencyManager:  pipenvDependencyManager,
 				InstallProcess:     pipenvProcess,
 				SitePackageProcess: pipenvSitePackageProcess,
+			},
+			pixi.Pixi: pixi.PixiBuildParameters{
+				DependencyManager: pixiDependencyManager,
+				InstallProcess:    pixiInstallProcess,
 			},
 			poetry.PoetryDependency: poetry.PoetryBuildParameters{
 				DependencyManager:  poetryDependencyManager,
@@ -354,6 +392,16 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				packit.BuildpackPlan{
 					Entries: []packit.BuildpackPlanEntry{
 						{
+							Name: pixi.Pixi,
+						},
+					},
+				},
+				1,
+			},
+			{
+				packit.BuildpackPlan{
+					Entries: []packit.BuildpackPlanEntry{
+						{
 							Name: pip.Pip,
 						},
 						{
@@ -380,6 +428,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(os.WriteFile(filepath.Join(workingDir, "x.py"), []byte{}, os.ModePerm)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(workingDir, "pyproject.toml"), []byte(""), 0755)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(workingDir, "uv.lock"), []byte(`python-requires = "3.13.0"`), 0755)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(workingDir, "pixi.lock"), []byte(``), 0755)).To(Succeed())
 	})
 
 	it("runs the build process and returns expected layers", func() {

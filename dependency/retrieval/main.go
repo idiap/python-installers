@@ -55,12 +55,17 @@ func (release PyPiRelease) Version() *semver.Version {
 }
 
 func getAllVersionsForInstaller(installer string) retrieve.GetAllVersionsFunc {
+	fmt.Printf("Handling: %s\n", installer)
 	if installer == "miniconda3" {
 		return getAllMinicondaVersions
 	}
 
 	if installer == "uv" {
 		return getAllUvVersions
+	}
+
+	if installer == "pixi" {
+		return getAllPixiVersions
 	}
 
 	return func() (versionology.VersionFetcherArray, error) {
@@ -349,7 +354,7 @@ func generateMinicondaMetadata(versionFetcher versionology.VersionFetcher) ([]ve
 	}}, nil
 }
 
-type UvRelease struct {
+type GitHubRelease struct {
 	version      *semver.Version
 	Arch         string
 	SourceURL    string
@@ -359,15 +364,15 @@ type UvRelease struct {
 	BinarySHA256 string
 }
 
-func (release UvRelease) Version() *semver.Version {
+func (release GitHubRelease) Version() *semver.Version {
 	return release.version
 }
 
-func getAllUvVersions() (versionology.VersionFetcherArray, error) {
+func getGitHubVersions(org string, project string, archAsset string) (versionology.VersionFetcherArray, error) {
 	client := github.NewClient(nil)
 
-	opt := &github.ListOptions{Page: 1, PerPage: 2}
-	releases, _, err := client.Repositories.ListReleases(context.Background(), "astral-sh", "uv", opt)
+	opt := &github.ListOptions{Page: 1, PerPage: 4}
+	releases, _, err := client.Repositories.ListReleases(context.Background(), org, project, opt)
 
 	if err != nil {
 		return nil, err
@@ -376,7 +381,7 @@ func getAllUvVersions() (versionology.VersionFetcherArray, error) {
 	var result versionology.VersionFetcherArray
 
 	for _, release := range releases {
-		version, err := semver.NewVersion(*release.Name)
+		version, err := semver.NewVersion(*release.TagName)
 		if err != nil {
 			return nil, err
 		}
@@ -394,14 +399,12 @@ func getAllUvVersions() (versionology.VersionFetcherArray, error) {
 			return nil, errors.New("Failed to find source asset")
 		}
 
-		archAsset := "uv-%s-unknown-linux-gnu.tar.gz"
-
 		for inArch, outArch := range ArchMap {
 			assetName := fmt.Sprintf(archAsset, inArch)
 			for _, asset := range release.Assets {
 				if *asset.Name == assetName {
 					result = append(result,
-						UvRelease{
+						GitHubRelease{
 							version:      version,
 							Arch:         outArch,
 							BinaryURL:    *asset.BrowserDownloadURL,
@@ -419,11 +422,15 @@ func getAllUvVersions() (versionology.VersionFetcherArray, error) {
 	return result, nil
 }
 
+func getAllUvVersions() (versionology.VersionFetcherArray, error) {
+	return getGitHubVersions("astral-sh", "uv", "uv-%s-unknown-linux-gnu.tar.gz")
+}
+
 func generateUvMetadata(versionFetcher versionology.VersionFetcher) ([]versionology.Dependency, error) {
 	version := versionFetcher.Version().String()
-	uvRelease, ok := versionFetcher.(UvRelease)
+	uvRelease, ok := versionFetcher.(GitHubRelease)
 	if !ok {
-		return nil, errors.New("expected a UvRelease")
+		return nil, errors.New("expected a GitHubRelease")
 	}
 
 	var licenseIDsAsInterface []interface{}
@@ -441,6 +448,43 @@ func generateUvMetadata(versionFetcher versionology.VersionFetcher) ([]versionol
 		SourceChecksum: uvRelease.SourceSHA256,
 		Stacks:         []string{"*"},
 		URI:            uvRelease.BinaryURL,
+		Version:        version,
+	}
+
+	return []versionology.Dependency{{
+		ConfigMetadataDependency: configMetadataDependency,
+		SemverVersion:            versionFetcher.Version(),
+	}}, nil
+}
+
+func getAllPixiVersions() (versionology.VersionFetcherArray, error) {
+	return getGitHubVersions("prefix-dev", "pixi", "pixi-%s-unknown-linux-musl.tar.gz")
+}
+
+func generatePixiMetadata(versionFetcher versionology.VersionFetcher) ([]versionology.Dependency, error) {
+	version := versionFetcher.Version().String()
+	pixiRelease, ok := versionFetcher.(GitHubRelease)
+	if !ok {
+		return nil, errors.New("expected a GitHubRelease")
+	}
+
+	fmt.Printf("version: %s\n", version)
+
+	var licenseIDsAsInterface []interface{}
+	licenseIDsAsInterface = append(licenseIDsAsInterface, "BSD-3-Clause")
+	configMetadataDependency := cargo.ConfigMetadataDependency{
+		CPE:            fmt.Sprintf("cpe:2.3:a:pixi:pixi:%s:*:*:*:*:python:*:*", version),
+		Checksum:       pixiRelease.BinarySHA256,
+		ID:             "pixi",
+		Licenses:       licenseIDsAsInterface,
+		Name:           "pixi",
+		OS:             "linux",
+		Arch:           pixiRelease.Arch,
+		PURL:           retrieve.GeneratePURL("pixi", version, pixiRelease.SourceSHA256, pixiRelease.SourceURL),
+		Source:         pixiRelease.SourceURL,
+		SourceChecksum: pixiRelease.SourceSHA256,
+		Stacks:         []string{"*"},
+		URI:            pixiRelease.BinaryURL,
 		Version:        version,
 	}
 
@@ -492,6 +536,7 @@ func main() {
 		"poetry":     generatePoetryMetadata,
 		"miniconda3": generateMinicondaMetadata,
 		"uv":         generateUvMetadata,
+		"pixi":       generatePixiMetadata,
 	}
 
 	var dependencies []versionology.Dependency

@@ -14,6 +14,7 @@ import (
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
+	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 
@@ -36,7 +37,14 @@ func Build(
 
 		var results []packit.BuildResult
 
-		orderedInstallers := []string{pip.Pip, pipenv.Pipenv, poetry.PoetryDependency, miniconda.Conda, uv.Uv}
+		orderedInstallers := []string{
+			pip.Pip,
+			pipenv.Pipenv,
+			poetry.PoetryDependency,
+			miniconda.Conda,
+			uv.Uv,
+			pixi.Pixi,
+		}
 
 		doneInstallers := []string{}
 
@@ -102,6 +110,17 @@ func Build(
 					case uv.Uv:
 						result, err := uv.Build(
 							parameters.(uv.UvBuildParameters),
+							commonBuildParameters,
+						)(context)
+
+						if err != nil {
+							return packit.BuildResult{}, err
+						}
+						results = append(results, result)
+
+					case pixi.Pixi:
+						result, err := pixi.Build(
+							parameters.(pixi.PixiBuildParameters),
 							commonBuildParameters,
 						)(context)
 
