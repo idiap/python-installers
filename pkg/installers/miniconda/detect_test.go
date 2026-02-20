@@ -11,6 +11,7 @@ import (
 	"github.com/sclevine/spec"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 
 	. "github.com/onsi/gomega"

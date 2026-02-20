@@ -35,10 +35,6 @@ type InstallProcess interface {
 	Execute(sourcePath, targetLayerPath, dependencyName string) error
 }
 
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
-}
-
 // UvBuildParameters encapsulates the uv specific parameters for the
 // Build function
 type UvBuildParameters struct {

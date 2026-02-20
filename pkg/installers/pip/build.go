@@ -42,10 +42,6 @@ type SitePackageProcess interface {
 	Execute(targetLayerPath string) (string, error)
 }
 
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
-}
-
 // PipBuildParameters encapsulates the pip specific parameters for the
 // Build function
 type PipBuildParameters struct {

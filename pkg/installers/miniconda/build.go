@@ -35,10 +35,6 @@ type Runner interface {
 	Run(runPath, layerPath string) error
 }
 
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
-}
-
 func GetEnvOrDefault(key, defaultValue string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {

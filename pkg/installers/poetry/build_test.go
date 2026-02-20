@@ -22,6 +22,8 @@ import (
 	"github.com/sclevine/spec"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	commonfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/fakes"
+
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
@@ -38,7 +40,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		dependencyManager *fakes.DependencyManager
 		installProcess    *fakes.InstallProcess
 		siteProcess       *fakes.SitePackageProcess
-		sbomGenerator     *fakes.SBOMGenerator
+		sbomGenerator     *commonfakes.SBOMGenerator
 
 		buffer *bytes.Buffer
 
@@ -80,7 +82,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}
 
 		// Syft SBOM
-		sbomGenerator = &fakes.SBOMGenerator{}
+		sbomGenerator = &commonfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		installProcess = &fakes.InstallProcess{}

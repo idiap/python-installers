@@ -35,10 +35,6 @@ type InstallProcess interface {
 	Execute(sourcePath, targetLayerPath, dependencyName string) error
 }
 
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
-}
-
 // PixiBuildParameters encapsulates the pixi specific parameters for the
 // Build function
 type PixiBuildParameters struct {
