@@ -23,7 +23,7 @@ import (
 	"github.com/sclevine/spec"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
-	commonfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip/fakes"
@@ -41,7 +41,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		dependencyManager  *fakes.DependencyManager
 		installProcess     *fakes.InstallProcess
 		sitePackageProcess *fakes.SitePackageProcess
-		sbomGenerator      *commonfakes.SBOMGenerator
+		sbomGenerator      *sbomfakes.SBOMGenerator
 
 		logger scribe.Emitter
 
@@ -97,7 +97,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		sitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pip", "lib", "python1.23", "site-packages")
 
 		// Syft SBOM
-		sbomGenerator = &commonfakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		buffer = bytes.NewBuffer(nil)

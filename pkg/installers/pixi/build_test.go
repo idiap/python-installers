@@ -16,7 +16,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
-	commonfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pixi/fakes"
@@ -42,7 +42,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		dependencyManager *fakes.DependencyManager
 		installProcess    *fakes.InstallProcess
-		sbomGenerator     *commonfakes.SBOMGenerator
+		sbomGenerator     *sbomfakes.SBOMGenerator
 
 		build        packit.BuildFunc
 		buildContext packit.BuildContext
@@ -82,7 +82,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}
 
 		// Syft SBOM
-		sbomGenerator = &commonfakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		installProcess = &fakes.InstallProcess{}

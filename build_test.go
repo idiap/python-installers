@@ -23,7 +23,7 @@ import (
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
 	pkgcommon "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
-	commonfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	minicondafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -60,7 +60,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buildContext packit.BuildContext
 
 		// common
-		sbomGenerator *commonfakes.SBOMGenerator
+		sbomGenerator *sbomfakes.SBOMGenerator
 		// dependencyManager *pipfakes.DependencyManager
 
 		// conda
@@ -103,7 +103,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger = scribe.NewEmitter(buffer)
 
-		sbomGenerator = &commonfakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		// miniconda

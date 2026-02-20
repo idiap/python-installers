@@ -23,7 +23,7 @@ import (
 	"github.com/sclevine/spec"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
-	commonfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv/fakes"
 
@@ -40,7 +40,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		dependencyManager *fakes.DependencyManager
 		installProcess    *fakes.InstallProcess
 		siteProcess       *fakes.SitePackageProcess
-		sbomGenerator     *commonfakes.SBOMGenerator
+		sbomGenerator     *sbomfakes.SBOMGenerator
 
 		buffer *bytes.Buffer
 
@@ -83,7 +83,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		siteProcess = &fakes.SitePackageProcess{}
 
 		// Syft SBOM
-		sbomGenerator = &commonfakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		buffer = bytes.NewBuffer(nil)
