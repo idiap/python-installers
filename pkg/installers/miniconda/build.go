@@ -20,7 +20,6 @@ import (
 
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 //go:generate faux --interface Runner --output fakes/runner.go
-//go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
 
 // DependencyManager defines the interface for picking the best matching
 // dependency and installing it.

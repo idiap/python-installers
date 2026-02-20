@@ -21,7 +21,6 @@ import (
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 //go:generate faux --interface InstallProcess --output fakes/install_process.go
 //go:generate faux --interface SitePackageProcess --output fakes/site_package_process.go
-//go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
 
 type DependencyManager interface {
 	Resolve(path, id, version, stack string) (postal.Dependency, error)

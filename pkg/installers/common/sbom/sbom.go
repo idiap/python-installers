@@ -10,6 +10,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 )
 
+//go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
+
 type SBOMGenerator interface {
 	GenerateFromDependency(dependency postal.Dependency, path string) (sbom.SBOM, error)
 }
