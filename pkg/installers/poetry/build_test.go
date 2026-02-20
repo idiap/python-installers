@@ -21,7 +21,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
@@ -44,7 +44,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		buffer *bytes.Buffer
 
-		build        packit.BuildFunc
+		buildFunc    packit.BuildFunc
 		buildContext packit.BuildContext
 	)
 
@@ -92,13 +92,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		build = poetry.Build(
+		buildFunc = poetry.Build(
 			poetry.PoetryBuildParameters{
 				dependencyManager,
 				installProcess,
 				siteProcess,
 			},
-			pythoninstallers.CommonBuildParameters{
+			build.CommonBuildParameters{
 				SbomGenerator: sbomGenerator,
 				Clock:         chronos.DefaultClock,
 				Logger:        logger,
@@ -129,7 +129,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("returns a result that installs poetry", func() {
-		result, err := build(buildContext)
+		result, err := buildFunc(buildContext)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(1))
@@ -199,7 +199,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("makes the layer available in those phases", func() {
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(1))
@@ -252,7 +252,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError("failed to resolve dependency"))
 			})
 		})
@@ -264,7 +264,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to parse layer content metadata")))
 			})
 		})
@@ -280,7 +280,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("could not remove file")))
 			})
 		})
@@ -291,7 +291,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError("failed to run install process"))
 			})
 		})
@@ -302,7 +302,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(`unsupported SBOM format: 'random-format'`))
 			})
 		})
@@ -313,7 +313,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to generate SBOM")))
 			})
 		})

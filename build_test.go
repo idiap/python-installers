@@ -22,7 +22,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	pkgcommon "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	minicondafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
@@ -56,7 +56,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		buffer       *bytes.Buffer
 		logger       scribe.Emitter
-		build        packit.BuildFunc
+		buildFunc    packit.BuildFunc
 		buildContext packit.BuildContext
 
 		// common
@@ -90,7 +90,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		pixiDependencyManager *pixifakes.DependencyManager
 		pixiInstallProcess    *pixifakes.InstallProcess
 
-		buildParameters pkgcommon.CommonBuildParameters
+		buildParameters build.CommonBuildParameters
 
 		testPlans []TestPlan
 	)
@@ -286,8 +286,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		pixiInstallProcess = &pixifakes.InstallProcess{}
 
-		buildParameters = pkgcommon.CommonBuildParameters{
-			SbomGenerator: pkgcommon.Generator{},
+		buildParameters = build.CommonBuildParameters{
+			SbomGenerator: sbomGenerator,
 			Clock:         chronos.DefaultClock,
 			Logger:        logger,
 		}
@@ -322,7 +322,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}
 
-		build = pythoninstallers.Build(logger, buildParameters, packagerParameters)
+		buildFunc = pythoninstallers.Build(logger, buildParameters, packagerParameters)
 
 		buildContext = packit.BuildContext{
 			BuildpackInfo: packit.BuildpackInfo{
@@ -436,7 +436,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		for _, testPlan := range testPlans {
 			logger.Detail("Doing: %s", testPlan)
 			buildContext.Plan = testPlan.Plan
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			layers := result.Layers
@@ -470,7 +470,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		for _, testPlan := range orderTestPlans {
 			logger.Detail("Doing: %s", testPlan)
 			buildContext.Plan = testPlan
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			layers := result.Layers
@@ -483,11 +483,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("fails if packager parameters is missing", func() {
 		packagerParameters := map[string]pythoninstallers.PackagerParameters{}
 
-		build = pythoninstallers.Build(logger, buildParameters, packagerParameters)
+		buildFunc = pythoninstallers.Build(logger, buildParameters, packagerParameters)
 
 		for _, testPlan := range testPlans {
 			buildContext.Plan = testPlan.Plan
-			_, err := build(buildContext)
+			_, err := buildFunc(buildContext)
 			Expect(err).To(HaveOccurred())
 		}
 	})

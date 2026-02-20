@@ -15,7 +15,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 )
 
 //go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
@@ -59,7 +59,7 @@ type CondaBuildParameters struct {
 // the dependency to reuse the layer when possible.
 func Build(
 	buildParameters CondaBuildParameters,
-	parameters pythoninstallers.CommonBuildParameters,
+	parameters build.CommonBuildParameters,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		runner := buildParameters.Runner

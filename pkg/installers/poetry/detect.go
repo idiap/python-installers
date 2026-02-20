@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 
 	"github.com/paketo-buildpacks/packit/v2"
@@ -58,7 +58,7 @@ func Detect(parser PyProjectParser) packit.DetectFunc {
 		requirements := []packit.BuildPlanRequirement{
 			{
 				Name: CPython,
-				Metadata: pythoninstallers.BuildPlanMetadata{
+				Metadata: build.BuildPlanMetadata{
 					Build:         true,
 					Version:       pythonVersion,
 					VersionSource: PyProjectTomlFile,
@@ -71,7 +71,7 @@ func Detect(parser PyProjectParser) packit.DetectFunc {
 		if version, ok := os.LookupEnv("BP_POETRY_VERSION"); ok {
 			requirements = append(requirements, packit.BuildPlanRequirement{
 				Name: PoetryDependency,
-				Metadata: pythoninstallers.BuildPlanMetadata{
+				Metadata: build.BuildPlanMetadata{
 					VersionSource: "BP_POETRY_VERSION",
 					Version:       version,
 				},

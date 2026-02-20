@@ -18,7 +18,7 @@ import (
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 )
 
 type PackagerParameters interface {
@@ -26,7 +26,7 @@ type PackagerParameters interface {
 
 func Build(
 	logger scribe.Emitter,
-	commonBuildParameters pythoninstallers.CommonBuildParameters,
+	commonBuildParameters build.CommonBuildParameters,
 	buildParameters map[string]PackagerParameters,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {

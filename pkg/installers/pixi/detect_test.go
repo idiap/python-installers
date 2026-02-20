@@ -13,7 +13,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 
 	. "github.com/onsi/gomega"
@@ -77,7 +77,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []packit.BuildPlanRequirement{
 						{
 							Name: pixi.Pixi,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								VersionSource: "BP_PIXI_VERSION",
 								Version:       "some-version",
 							},

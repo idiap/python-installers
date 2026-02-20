@@ -22,7 +22,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -47,7 +47,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		buffer *bytes.Buffer
 
-		build        packit.BuildFunc
+		buildFunc    packit.BuildFunc
 		buildContext packit.BuildContext
 	)
 
@@ -103,13 +103,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger = scribe.NewEmitter(buffer)
 
-		build = pip.Build(
+		buildFunc = pip.Build(
 			pip.PipBuildParameters{
 				dependencyManager,
 				installProcess,
 				sitePackageProcess,
 			},
-			pythoninstallers.CommonBuildParameters{
+			build.CommonBuildParameters{
 				SbomGenerator: sbomGenerator,
 				Clock:         chronos.DefaultClock,
 				Logger:        logger,
@@ -142,7 +142,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("returns a result that installs pip", func() {
-		result, err := build(buildContext)
+		result, err := buildFunc(buildContext)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(2))
@@ -227,7 +227,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("makes the layer available at the right times", func() {
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(2))
@@ -295,7 +295,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("skips the build process if the cached dependency sha matches the selected dependency sha", func() {
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(2))
@@ -329,7 +329,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				dependencyManager.ResolveCall.Returns.Error = errors.New("failed to resolve dependency")
 			})
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("failed to resolve dependency")))
 			})
@@ -345,7 +345,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
@@ -362,7 +362,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
@@ -373,7 +373,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				dependencyManager.DeliverCall.Returns.Error = errors.New("failed to install dependency")
 			})
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("failed to install dependency")))
 			})
@@ -385,7 +385,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to find site-packages dir")))
 			})
 		})
@@ -396,7 +396,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("pip installation failed: site packages are missing from the pip layer")))
 			})
 		})
@@ -407,7 +407,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(`unsupported SBOM format: 'random-format'`))
 			})
 		})
@@ -418,7 +418,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to generate SBOM")))
 			})
 		})

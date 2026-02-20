@@ -15,7 +15,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	common "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -65,7 +65,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Requires: []packit.BuildPlanRequirement{
 				{
 					Name: pip.CPython,
-					Metadata: common.BuildPlanMetadata{
+					Metadata: build.BuildPlanMetadata{
 						Build: true,
 					},
 				},
@@ -88,14 +88,14 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Requires: []packit.BuildPlanRequirement{
 				{
 					Name: pipenv.CPython,
-					Metadata: common.BuildPlanMetadata{
+					Metadata: build.BuildPlanMetadata{
 						Build:  true,
 						Launch: false,
 					},
 				},
 				{
 					Name: pipenv.Pip,
-					Metadata: common.BuildPlanMetadata{
+					Metadata: build.BuildPlanMetadata{
 						Build:  true,
 						Launch: false,
 					},
@@ -141,7 +141,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Requires: []packit.BuildPlanRequirement{
 								{
 									Name: poetry.CPython,
-									Metadata: common.BuildPlanMetadata{
+									Metadata: build.BuildPlanMetadata{
 										Build:         true,
 										Version:       "1.2.3",
 										VersionSource: "pyproject.toml",
@@ -149,7 +149,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								},
 								{
 									Name: poetry.Pip,
-									Metadata: common.BuildPlanMetadata{
+									Metadata: build.BuildPlanMetadata{
 										Build: true,
 									},
 								},
@@ -187,7 +187,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Requires: []packit.BuildPlanRequirement{
 								{
 									Name: poetry.CPython,
-									Metadata: common.BuildPlanMetadata{
+									Metadata: build.BuildPlanMetadata{
 										Build:         true,
 										Version:       "1.2.3",
 										VersionSource: "pyproject.toml",
@@ -195,7 +195,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 								},
 								{
 									Name: poetry.Pip,
-									Metadata: common.BuildPlanMetadata{
+									Metadata: build.BuildPlanMetadata{
 										Build: true,
 									},
 								},

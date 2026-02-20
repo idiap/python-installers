@@ -10,7 +10,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
 )
 
 // Return a pip requirement
@@ -32,7 +32,7 @@ func GetVersionedRequirement() *packit.BuildPlanRequirement {
 
 	return &packit.BuildPlanRequirement{
 		Name: Pip,
-		Metadata: pythoninstallers.BuildPlanMetadata{
+		Metadata: build.BuildPlanMetadata{
 			VersionSource: "BP_PIP_VERSION",
 			Version:       pipVersion,
 		},
@@ -47,7 +47,7 @@ func GetRequirement() packit.BuildPlanRequirement {
 
 	return packit.BuildPlanRequirement{
 		Name: Pip,
-		Metadata: pythoninstallers.BuildPlanMetadata{
+		Metadata: build.BuildPlanMetadata{
 			Build: true,
 		},
 	}
@@ -67,7 +67,7 @@ func Detect() packit.DetectFunc {
 		requirements := []packit.BuildPlanRequirement{
 			{
 				Name: CPython,
-				Metadata: pythoninstallers.BuildPlanMetadata{
+				Metadata: build.BuildPlanMetadata{
 					Build: true,
 				},
 			},
