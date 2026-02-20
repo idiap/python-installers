@@ -23,6 +23,7 @@ import (
 	"github.com/sclevine/spec"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -38,7 +39,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir string
 		cnbDir    string
 
-		dependencyManager  *fakes.DependencyManager
+		dependencyManager  *dependencyfakes.DependencyManager
 		installProcess     *fakes.InstallProcess
 		sitePackageProcess *fakes.SitePackageProcess
 		sbomGenerator      *sbomfakes.SBOMGenerator
@@ -59,7 +60,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		cnbDir, err = os.MkdirTemp("", "cnb")
 		Expect(err).NotTo(HaveOccurred())
 
-		dependencyManager = &fakes.DependencyManager{}
+		dependencyManager = &dependencyfakes.DependencyManager{}
 		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pip",
 			Name:     "Pip",

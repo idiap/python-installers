@@ -16,6 +16,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
@@ -40,7 +41,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		buffer *bytes.Buffer
 
-		dependencyManager *fakes.DependencyManager
+		dependencyManager *dependencyfakes.DependencyManager
 		installProcess    *fakes.InstallProcess
 		sbomGenerator     *sbomfakes.SBOMGenerator
 
@@ -56,7 +57,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		cnbDir, err = os.MkdirTemp("", "cnb")
 		Expect(err).NotTo(HaveOccurred())
 
-		dependencyManager = &fakes.DependencyManager{}
+		dependencyManager = &dependencyfakes.DependencyManager{}
 		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pixi",
 			Name:     "pixi-dependency-name",

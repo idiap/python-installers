@@ -23,6 +23,7 @@ import (
 	"github.com/sclevine/spec"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv/fakes"
@@ -37,7 +38,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir string
 		cnbDir    string
 
-		dependencyManager *fakes.DependencyManager
+		dependencyManager *dependencyfakes.DependencyManager
 		installProcess    *fakes.InstallProcess
 		siteProcess       *fakes.SitePackageProcess
 		sbomGenerator     *sbomfakes.SBOMGenerator
@@ -54,7 +55,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir = t.TempDir()
 		cnbDir = t.TempDir()
 
-		dependencyManager = &fakes.DependencyManager{}
+		dependencyManager = &dependencyfakes.DependencyManager{}
 		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pipenv",
 			Name:     "pipenv-dependency-name",

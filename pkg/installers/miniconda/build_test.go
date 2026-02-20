@@ -15,6 +15,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
@@ -39,7 +40,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		buffer *bytes.Buffer
 
-		dependencyManager *fakes.DependencyManager
+		dependencyManager *dependencyfakes.DependencyManager
 		runner            *fakes.Runner
 		sbomGenerator     *sbomfakes.SBOMGenerator
 
@@ -55,7 +56,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		cnbDir, err = os.MkdirTemp("", "cnb")
 		Expect(err).NotTo(HaveOccurred())
 
-		dependencyManager = &fakes.DependencyManager{}
+		dependencyManager = &dependencyfakes.DependencyManager{}
 		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "miniconda3",
 			Name:     "miniconda3-dependency-name",

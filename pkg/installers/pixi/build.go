@@ -12,22 +12,13 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/cargo"
 	"github.com/paketo-buildpacks/packit/v2/draft"
-	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency"
 )
 
-//go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 //go:generate faux --interface Runner --output fakes/runner.go
-
-// DependencyManager defines the interface for picking the best matching
-// dependency and installing it.
-type DependencyManager interface {
-	Resolve(path, id, version, stack string) (postal.Dependency, error)
-	Deliver(dependency postal.Dependency, cnbPath, destinationPath, platformPath string) error
-	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
-}
 
 // InstallProcess defines the interface for installing the poetry dependency into a layer.
 type InstallProcess interface {
@@ -37,7 +28,7 @@ type InstallProcess interface {
 // PixiBuildParameters encapsulates the pixi specific parameters for the
 // Build function
 type PixiBuildParameters struct {
-	DependencyManager DependencyManager
+	DependencyManager dependency.DependencyManager
 	InstallProcess    InstallProcess
 }
 

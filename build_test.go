@@ -23,6 +23,7 @@ import (
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
 	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	minicondafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
@@ -61,33 +62,33 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		// common
 		sbomGenerator *sbomfakes.SBOMGenerator
-		// dependencyManager *pipfakes.DependencyManager
+		// dependencyManager *dependencyfakes.DependencyManager
 
 		// conda
-		minicondaDependencyManager *minicondafakes.DependencyManager
+		minicondaDependencyManager *dependencyfakes.DependencyManager
 		runner                     *minicondafakes.Runner
 
 		// pip
-		pipDependencyManager  *pipfakes.DependencyManager
+		pipDependencyManager  *dependencyfakes.DependencyManager
 		pipInstallProcess     *pipfakes.InstallProcess
 		pipSitePackageProcess *pipfakes.SitePackageProcess
 
 		// pipenv
-		pipenvDependencyManager  *pipenvfakes.DependencyManager
+		pipenvDependencyManager  *dependencyfakes.DependencyManager
 		pipenvProcess            *pipenvfakes.InstallProcess
 		pipenvSitePackageProcess *pipenvfakes.SitePackageProcess
 
 		// poetry
-		poetryDependencyManager  *poetryfakes.DependencyManager
+		poetryDependencyManager  *dependencyfakes.DependencyManager
 		poetryProcess            *poetryfakes.InstallProcess
 		poetrySitePackageProcess *poetryfakes.SitePackageProcess
 
 		// uv
-		uvDependencyManager *uvfakes.DependencyManager
+		uvDependencyManager *dependencyfakes.DependencyManager
 		uvInstallProcess    *uvfakes.InstallProcess
 
 		// pixi
-		pixiDependencyManager *pixifakes.DependencyManager
+		pixiDependencyManager *dependencyfakes.DependencyManager
 		pixiInstallProcess    *pixifakes.InstallProcess
 
 		buildParameters build.CommonBuildParameters
@@ -107,7 +108,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		// miniconda
-		minicondaDependencyManager = &minicondafakes.DependencyManager{}
+		minicondaDependencyManager = &dependencyfakes.DependencyManager{}
 		minicondaDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "miniconda3",
 			Name:     "miniconda3-dependency-name",
@@ -135,7 +136,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		runner = &minicondafakes.Runner{}
 
 		// pip
-		pipDependencyManager = &pipfakes.DependencyManager{}
+		pipDependencyManager = &dependencyfakes.DependencyManager{}
 		pipDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pip",
 			Name:     "Pip",
@@ -172,7 +173,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		pipSitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pip", "lib", "python1.23", "site-packages")
 
 		// pipenv
-		pipenvDependencyManager = &pipenvfakes.DependencyManager{}
+		pipenvDependencyManager = &dependencyfakes.DependencyManager{}
 		pipenvDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pipenv",
 			Name:     "pipenv-dependency-name",
@@ -202,7 +203,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		pipenvSitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pipenv", "lib", "python3.8", "site-packages")
 
 		// poetry
-		poetryDependencyManager = &poetryfakes.DependencyManager{}
+		poetryDependencyManager = &dependencyfakes.DependencyManager{}
 		poetryDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "poetry",
 			Name:     "poetry-dependency-name",
@@ -231,7 +232,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		poetrySitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "poetry", "lib", "python3.8", "site-packages")
 
 		// uv
-		uvDependencyManager = &uvfakes.DependencyManager{}
+		uvDependencyManager = &dependencyfakes.DependencyManager{}
 		uvDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "uv",
 			Name:     "uv-dependency-name",
@@ -259,7 +260,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		uvInstallProcess = &uvfakes.InstallProcess{}
 
 		// pixi
-		pixiDependencyManager = &pixifakes.DependencyManager{}
+		pixiDependencyManager = &dependencyfakes.DependencyManager{}
 		pixiDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pixi",
 			Name:     "pixi-dependency-name",

@@ -12,20 +12,14 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/draft"
-	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency"
 )
 
-//go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 //go:generate faux --interface InstallProcess --output fakes/install_process.go
 //go:generate faux --interface SitePackageProcess --output fakes/site_package_process.go
-
-type DependencyManager interface {
-	Resolve(path, id, version, stack string) (postal.Dependency, error)
-	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
-}
 
 // InstallProcess defines the interface for installing the poetry dependency into a layer.
 type InstallProcess interface {
@@ -37,14 +31,10 @@ type SitePackageProcess interface {
 	Execute(targetLayerPath string) (string, error)
 }
 
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
-}
-
 // PoetryBuildParameters encapsulates the pip specific parameters for the
 // Build function
 type PoetryBuildParameters struct {
-	DependencyManager  DependencyManager
+	DependencyManager  dependency.DependencyManager
 	InstallProcess     InstallProcess
 	SitePackageProcess SitePackageProcess
 }
