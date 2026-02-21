@@ -14,8 +14,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/pexec"
 	"github.com/sclevine/spec"
 
+	"github.com/paketo-buildpacks/python-installers/pkg/executable/fakes"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
 	. "github.com/onsi/gomega"
 )

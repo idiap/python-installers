@@ -22,7 +22,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	pkgcommon "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	minicondafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -35,6 +36,7 @@ import (
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 	uvfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/uv/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
 
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
@@ -55,41 +57,41 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		buffer       *bytes.Buffer
 		logger       scribe.Emitter
-		build        packit.BuildFunc
+		buildFunc    packit.BuildFunc
 		buildContext packit.BuildContext
 
 		// common
-		sbomGenerator *pipfakes.SBOMGenerator
-		// dependencyManager *pipfakes.DependencyManager
+		sbomGenerator *sbomfakes.SBOMGenerator
+		// dependencyManager *dependencyfakes.DependencyManager
 
 		// conda
-		minicondaDependencyManager *minicondafakes.DependencyManager
+		minicondaDependencyManager *dependencyfakes.DependencyManager
 		runner                     *minicondafakes.Runner
 
 		// pip
-		pipDependencyManager  *pipfakes.DependencyManager
+		pipDependencyManager  *dependencyfakes.DependencyManager
 		pipInstallProcess     *pipfakes.InstallProcess
 		pipSitePackageProcess *pipfakes.SitePackageProcess
 
 		// pipenv
-		pipenvDependencyManager  *pipenvfakes.DependencyManager
+		pipenvDependencyManager  *dependencyfakes.DependencyManager
 		pipenvProcess            *pipenvfakes.InstallProcess
 		pipenvSitePackageProcess *pipenvfakes.SitePackageProcess
 
 		// poetry
-		poetryDependencyManager  *poetryfakes.DependencyManager
+		poetryDependencyManager  *dependencyfakes.DependencyManager
 		poetryProcess            *poetryfakes.InstallProcess
 		poetrySitePackageProcess *poetryfakes.SitePackageProcess
 
 		// uv
-		uvDependencyManager *uvfakes.DependencyManager
+		uvDependencyManager *dependencyfakes.DependencyManager
 		uvInstallProcess    *uvfakes.InstallProcess
 
 		// pixi
-		pixiDependencyManager *pixifakes.DependencyManager
+		pixiDependencyManager *dependencyfakes.DependencyManager
 		pixiInstallProcess    *pixifakes.InstallProcess
 
-		buildParameters pkgcommon.CommonBuildParameters
+		buildParameters build.CommonBuildParameters
 
 		testPlans []TestPlan
 	)
@@ -102,11 +104,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger = scribe.NewEmitter(buffer)
 
-		sbomGenerator = &pipfakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		// miniconda
-		minicondaDependencyManager = &minicondafakes.DependencyManager{}
+		minicondaDependencyManager = &dependencyfakes.DependencyManager{}
 		minicondaDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "miniconda3",
 			Name:     "miniconda3-dependency-name",
@@ -134,7 +136,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		runner = &minicondafakes.Runner{}
 
 		// pip
-		pipDependencyManager = &pipfakes.DependencyManager{}
+		pipDependencyManager = &dependencyfakes.DependencyManager{}
 		pipDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pip",
 			Name:     "Pip",
@@ -171,7 +173,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		pipSitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pip", "lib", "python1.23", "site-packages")
 
 		// pipenv
-		pipenvDependencyManager = &pipenvfakes.DependencyManager{}
+		pipenvDependencyManager = &dependencyfakes.DependencyManager{}
 		pipenvDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pipenv",
 			Name:     "pipenv-dependency-name",
@@ -201,7 +203,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		pipenvSitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pipenv", "lib", "python3.8", "site-packages")
 
 		// poetry
-		poetryDependencyManager = &poetryfakes.DependencyManager{}
+		poetryDependencyManager = &dependencyfakes.DependencyManager{}
 		poetryDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "poetry",
 			Name:     "poetry-dependency-name",
@@ -230,7 +232,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		poetrySitePackageProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "poetry", "lib", "python3.8", "site-packages")
 
 		// uv
-		uvDependencyManager = &uvfakes.DependencyManager{}
+		uvDependencyManager = &dependencyfakes.DependencyManager{}
 		uvDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "uv",
 			Name:     "uv-dependency-name",
@@ -258,7 +260,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		uvInstallProcess = &uvfakes.InstallProcess{}
 
 		// pixi
-		pixiDependencyManager = &pixifakes.DependencyManager{}
+		pixiDependencyManager = &dependencyfakes.DependencyManager{}
 		pixiDependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pixi",
 			Name:     "pixi-dependency-name",
@@ -285,8 +287,8 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		pixiInstallProcess = &pixifakes.InstallProcess{}
 
-		buildParameters = pkgcommon.CommonBuildParameters{
-			SbomGenerator: pkgcommon.Generator{},
+		buildParameters = build.CommonBuildParameters{
+			SbomGenerator: sbomGenerator,
 			Clock:         chronos.DefaultClock,
 			Logger:        logger,
 		}
@@ -321,7 +323,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			},
 		}
 
-		build = pythoninstallers.Build(logger, buildParameters, packagerParameters)
+		buildFunc = pythoninstallers.Build(logger, buildParameters, packagerParameters)
 
 		buildContext = packit.BuildContext{
 			BuildpackInfo: packit.BuildpackInfo{
@@ -435,7 +437,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		for _, testPlan := range testPlans {
 			logger.Detail("Doing: %s", testPlan)
 			buildContext.Plan = testPlan.Plan
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			layers := result.Layers
@@ -469,7 +471,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		for _, testPlan := range orderTestPlans {
 			logger.Detail("Doing: %s", testPlan)
 			buildContext.Plan = testPlan
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			layers := result.Layers
@@ -482,11 +484,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it("fails if packager parameters is missing", func() {
 		packagerParameters := map[string]pythoninstallers.PackagerParameters{}
 
-		build = pythoninstallers.Build(logger, buildParameters, packagerParameters)
+		buildFunc = pythoninstallers.Build(logger, buildParameters, packagerParameters)
 
 		for _, testPlan := range testPlans {
 			buildContext.Plan = testPlan.Plan
-			_, err := build(buildContext)
+			_, err := buildFunc(buildContext)
 			Expect(err).To(HaveOccurred())
 		}
 	})

@@ -21,7 +21,10 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
+
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
@@ -35,14 +38,14 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir string
 		cnbDir    string
 
-		dependencyManager *fakes.DependencyManager
+		dependencyManager *dependencyfakes.DependencyManager
 		installProcess    *fakes.InstallProcess
 		siteProcess       *fakes.SitePackageProcess
-		sbomGenerator     *fakes.SBOMGenerator
+		sbomGenerator     *sbomfakes.SBOMGenerator
 
 		buffer *bytes.Buffer
 
-		build        packit.BuildFunc
+		buildFunc    packit.BuildFunc
 		buildContext packit.BuildContext
 	)
 
@@ -55,7 +58,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		// Legacy SBOM
-		dependencyManager = &fakes.DependencyManager{}
+		dependencyManager = &dependencyfakes.DependencyManager{}
 		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "poetry",
 			Name:     "poetry-dependency-name",
@@ -80,7 +83,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		}
 
 		// Syft SBOM
-		sbomGenerator = &fakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		installProcess = &fakes.InstallProcess{}
@@ -90,13 +93,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		buffer = bytes.NewBuffer(nil)
 		logger := scribe.NewEmitter(buffer)
 
-		build = poetry.Build(
+		buildFunc = poetry.Build(
 			poetry.PoetryBuildParameters{
 				dependencyManager,
 				installProcess,
 				siteProcess,
 			},
-			pythoninstallers.CommonBuildParameters{
+			build.CommonBuildParameters{
 				SbomGenerator: sbomGenerator,
 				Clock:         chronos.DefaultClock,
 				Logger:        logger,
@@ -127,7 +130,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("returns a result that installs poetry", func() {
-		result, err := build(buildContext)
+		result, err := buildFunc(buildContext)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(1))
@@ -197,7 +200,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("makes the layer available in those phases", func() {
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(1))
@@ -250,7 +253,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError("failed to resolve dependency"))
 			})
 		})
@@ -262,7 +265,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to parse layer content metadata")))
 			})
 		})
@@ -278,7 +281,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("could not remove file")))
 			})
 		})
@@ -289,7 +292,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError("failed to run install process"))
 			})
 		})
@@ -300,7 +303,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(`unsupported SBOM format: 'random-format'`))
 			})
 		})
@@ -311,7 +314,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to generate SBOM")))
 			})
 		})

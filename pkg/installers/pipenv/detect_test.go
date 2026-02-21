@@ -13,7 +13,7 @@ import (
 
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 
 	. "github.com/onsi/gomega"
@@ -50,14 +50,14 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: pipenv.CPython,
-						Metadata: pythoninstallers.BuildPlanMetadata{
+						Metadata: build.BuildPlanMetadata{
 							Build:  true,
 							Launch: false,
 						},
 					},
 					{
 						Name: pipenv.Pip,
-						Metadata: pythoninstallers.BuildPlanMetadata{
+						Metadata: build.BuildPlanMetadata{
 							Build:  true,
 							Launch: false,
 						},
@@ -86,21 +86,21 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []packit.BuildPlanRequirement{
 						{
 							Name: pipenv.CPython,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								Build:  true,
 								Launch: false,
 							},
 						},
 						{
 							Name: pipenv.Pip,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								Build:  true,
 								Launch: false,
 							},
 						},
 						{
 							Name: pipenv.Pipenv,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								Version:       "1.2.3",
 								VersionSource: "BP_PIPENV_VERSION",
 							},

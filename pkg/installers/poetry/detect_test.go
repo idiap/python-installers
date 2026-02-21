@@ -17,7 +17,7 @@ import (
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 func testDetect(t *testing.T, context spec.G, it spec.S) {
@@ -64,7 +64,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: poetry.CPython,
-						Metadata: pythoninstallers.BuildPlanMetadata{
+						Metadata: build.BuildPlanMetadata{
 							Build:         true,
 							Version:       "1.2.3",
 							VersionSource: "pyproject.toml",
@@ -72,7 +72,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					},
 					{
 						Name: poetry.Pip,
-						Metadata: pythoninstallers.BuildPlanMetadata{
+						Metadata: build.BuildPlanMetadata{
 							Build: true,
 						},
 					},
@@ -101,7 +101,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []packit.BuildPlanRequirement{
 						{
 							Name: poetry.CPython,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								Build:         true,
 								Version:       "1.2.3",
 								VersionSource: "pyproject.toml",
@@ -109,13 +109,13 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						},
 						{
 							Name: poetry.Pip,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								Build: true,
 							},
 						},
 						{
 							Name: poetry.PoetryDependency,
-							Metadata: pythoninstallers.BuildPlanMetadata{
+							Metadata: build.BuildPlanMetadata{
 								VersionSource: "BP_POETRY_VERSION",
 								Version:       "some-version",
 							},

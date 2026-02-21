@@ -64,7 +64,6 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				err  error
 			)
 
-			fmt.Printf("Settings are: %s", settings)
 			image, logs, err = pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(

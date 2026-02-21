@@ -12,7 +12,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 // Detect will return a packit.DetectFunc that will be invoked during the
@@ -49,7 +49,7 @@ func Detect() packit.DetectFunc {
 			plan.Requires = []packit.BuildPlanRequirement{
 				{
 					Name: Uv,
-					Metadata: pythoninstallers.BuildPlanMetadata{
+					Metadata: build.BuildPlanMetadata{
 						VersionSource: "BP_UV_VERSION",
 						Version:       version,
 					},

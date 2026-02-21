@@ -13,8 +13,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/pexec"
 	"github.com/sclevine/spec"
 
+	"github.com/paketo-buildpacks/python-installers/pkg/executable/fakes"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip/fakes"
 
 	. "github.com/onsi/gomega"
 )

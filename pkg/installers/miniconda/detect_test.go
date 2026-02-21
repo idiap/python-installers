@@ -10,7 +10,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 
 	. "github.com/onsi/gomega"
@@ -61,7 +62,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: "conda",
-						Metadata: pythoninstallers.BuildPlanMetadata{
+						Metadata: build.BuildPlanMetadata{
 							Version:       "some-version",
 							VersionSource: "BP_MINICONDA_VERSION",
 						},

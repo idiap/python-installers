@@ -22,9 +22,11 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
 
 	. "github.com/onsi/gomega"
 )
@@ -36,16 +38,16 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir string
 		cnbDir    string
 
-		dependencyManager *fakes.DependencyManager
+		dependencyManager *dependencyfakes.DependencyManager
 		installProcess    *fakes.InstallProcess
 		siteProcess       *fakes.SitePackageProcess
-		sbomGenerator     *fakes.SBOMGenerator
+		sbomGenerator     *sbomfakes.SBOMGenerator
 
 		buffer *bytes.Buffer
 
 		logger scribe.Emitter
 
-		build        packit.BuildFunc
+		buildFunc    packit.BuildFunc
 		buildContext packit.BuildContext
 	)
 
@@ -53,7 +55,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		layersDir = t.TempDir()
 		cnbDir = t.TempDir()
 
-		dependencyManager = &fakes.DependencyManager{}
+		dependencyManager = &dependencyfakes.DependencyManager{}
 		dependencyManager.ResolveCall.Returns.Dependency = postal.Dependency{
 			ID:       "pipenv",
 			Name:     "pipenv-dependency-name",
@@ -82,7 +84,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		siteProcess = &fakes.SitePackageProcess{}
 
 		// Syft SBOM
-		sbomGenerator = &fakes.SBOMGenerator{}
+		sbomGenerator = &sbomfakes.SBOMGenerator{}
 		sbomGenerator.GenerateFromDependencyCall.Returns.SBOM = sbom.SBOM{}
 
 		buffer = bytes.NewBuffer(nil)
@@ -90,13 +92,13 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 		siteProcess.ExecuteCall.Returns.String = filepath.Join(layersDir, "pipenv", "lib", "python3.8", "site-packages")
 
-		build = pipenv.Build(
+		buildFunc = pipenv.Build(
 			pipenv.PipEnvBuildParameters{
 				dependencyManager,
 				installProcess,
 				siteProcess,
 			},
-			pythoninstallers.CommonBuildParameters{
+			build.CommonBuildParameters{
 				SbomGenerator: sbomGenerator,
 				Clock:         chronos.DefaultClock,
 				Logger:        logger,
@@ -124,7 +126,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("returns a result that installs pipenv", func() {
-		result, err := build(buildContext)
+		result, err := buildFunc(buildContext)
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(1))
@@ -187,7 +189,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("makes the layer available at the right times", func() {
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(1))
@@ -248,7 +250,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("skips the build process if the cached dependency sha matches the selected dependency sha", func() {
-			result, err := build(buildContext)
+			result, err := buildFunc(buildContext)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(result.Layers).To(HaveLen(1))
@@ -272,7 +274,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				dependencyManager.ResolveCall.Returns.Error = errors.New("failed to resolve dependency")
 			})
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("failed to resolve dependency")))
 			})
@@ -288,7 +290,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
@@ -305,7 +307,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("permission denied")))
 			})
@@ -316,7 +318,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 				installProcess.ExecuteCall.Returns.Error = errors.New("failed to install dependency")
 			})
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 
 				Expect(err).To(MatchError(ContainSubstring("failed to install dependency")))
 			})
@@ -328,7 +330,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to find site-packages dir")))
 			})
 		})
@@ -339,7 +341,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("pipenv installation failed: site packages are missing from the pipenv layer")))
 			})
 		})
@@ -350,7 +352,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(`unsupported SBOM format: 'random-format'`))
 			})
 		})
@@ -361,7 +363,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			})
 
 			it("returns an error", func() {
-				_, err := build(buildContext)
+				_, err := buildFunc(buildContext)
 				Expect(err).To(MatchError(ContainSubstring("failed to generate SBOM")))
 			})
 		})

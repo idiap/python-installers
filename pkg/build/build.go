@@ -3,29 +3,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package pythoninstallers
+package build
 
 import (
 	"github.com/paketo-buildpacks/packit/v2/chronos"
-	"github.com/paketo-buildpacks/packit/v2/postal"
-	"github.com/paketo-buildpacks/packit/v2/sbom"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
+
+	"github.com/paketo-buildpacks/python-installers/pkg/sbom"
 )
-
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, path string) (sbom.SBOM, error)
-}
-
-type Generator struct{}
-
-func (f Generator) GenerateFromDependency(dependency postal.Dependency, path string) (sbom.SBOM, error) {
-	return sbom.GenerateFromDependency(dependency, path)
-}
 
 // CommonBuildParameters are the parameters shared
 // by all packager build function implementation
 type CommonBuildParameters struct {
-	SbomGenerator SBOMGenerator
+	SbomGenerator sbom.SBOMGenerator
 	Clock         chronos.Clock
 	Logger        scribe.Emitter
 }

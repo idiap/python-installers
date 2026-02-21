@@ -9,7 +9,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 )
 
@@ -27,7 +27,7 @@ func Detect() packit.DetectFunc {
 		requirements := []packit.BuildPlanRequirement{
 			{
 				Name: CPython,
-				Metadata: pythoninstallers.BuildPlanMetadata{
+				Metadata: build.BuildPlanMetadata{
 					Build: true,
 				},
 			},
@@ -39,7 +39,7 @@ func Detect() packit.DetectFunc {
 		if ok {
 			requirements = append(requirements, packit.BuildPlanRequirement{
 				Name: Pipenv,
-				Metadata: pythoninstallers.BuildPlanMetadata{
+				Metadata: build.BuildPlanMetadata{
 					Version:       pipEnvVersion,
 					VersionSource: "BP_PIPENV_VERSION",
 				},

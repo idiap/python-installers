@@ -9,7 +9,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 // Detect will return a packit.DetectFunc that will be invoked during the
@@ -24,7 +24,7 @@ func Detect() packit.DetectFunc {
 			requirements = []packit.BuildPlanRequirement{
 				{
 					Name: Conda,
-					Metadata: pythoninstallers.BuildPlanMetadata{
+					Metadata: build.BuildPlanMetadata{
 						VersionSource: "BP_MINICONDA_VERSION",
 						Version:       version,
 					},

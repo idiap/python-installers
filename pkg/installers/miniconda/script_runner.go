@@ -9,22 +9,17 @@ import (
 	"fmt"
 
 	"github.com/paketo-buildpacks/packit/v2/pexec"
+
+	"github.com/paketo-buildpacks/python-installers/pkg/executable"
 )
-
-//go:generate faux --interface Executable --output fakes/executable.go
-
-// Executable defines the interface for invoking an executable.
-type Executable interface {
-	Execute(execution pexec.Execution) error
-}
 
 // ScriptRunner implements the Runner interface
 type ScriptRunner struct {
-	executable Executable
+	executable executable.Executable
 }
 
 // NewScriptRunner creates an instance of the ScriptRunner given an Executable that runs `bash`.
-func NewScriptRunner(executable Executable) ScriptRunner {
+func NewScriptRunner(executable executable.Executable) ScriptRunner {
 	return ScriptRunner{
 		executable: executable,
 	}

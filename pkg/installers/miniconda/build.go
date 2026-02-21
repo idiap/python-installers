@@ -12,31 +12,17 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/cargo"
 	"github.com/paketo-buildpacks/packit/v2/draft"
-	"github.com/paketo-buildpacks/packit/v2/postal"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers/pkg/installers/common"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/dependency"
 )
 
-//go:generate faux --interface DependencyManager --output fakes/dependency_manager.go
 //go:generate faux --interface Runner --output fakes/runner.go
-//go:generate faux --interface SBOMGenerator --output fakes/sbom_generator.go
-
-// DependencyManager defines the interface for picking the best matching
-// dependency and installing it.
-type DependencyManager interface {
-	Resolve(path, id, version, stack string) (postal.Dependency, error)
-	Deliver(dependency postal.Dependency, cnbPath, destinationPath, platformPath string) error
-	GenerateBillOfMaterials(dependencies ...postal.Dependency) []packit.BOMEntry
-}
 
 // Runner defines the interface for invoking the miniconda script downloaded as a dependency.
 type Runner interface {
 	Run(runPath, layerPath string) error
-}
-
-type SBOMGenerator interface {
-	GenerateFromDependency(dependency postal.Dependency, dir string) (sbom.SBOM, error)
 }
 
 func GetEnvOrDefault(key, defaultValue string) string {
@@ -50,7 +36,7 @@ func GetEnvOrDefault(key, defaultValue string) string {
 // CondaBuildParameters encapsulates the conda specific parameters for the
 // Build function
 type CondaBuildParameters struct {
-	DependencyManager DependencyManager
+	DependencyManager dependency.DependencyManager
 	Runner            Runner
 }
 
@@ -63,7 +49,7 @@ type CondaBuildParameters struct {
 // the dependency to reuse the layer when possible.
 func Build(
 	buildParameters CondaBuildParameters,
-	parameters pythoninstallers.CommonBuildParameters,
+	parameters build.CommonBuildParameters,
 ) packit.BuildFunc {
 	return func(context packit.BuildContext) (packit.BuildResult, error) {
 		runner := buildParameters.Runner
