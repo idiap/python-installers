@@ -10,8 +10,9 @@ const (
 	PoetryLayerName       = "poetry"
 	CPython               = "cpython"
 	Pip                   = "pip"
+	EnvVersion            = "BP_POETRY_VERSION"
 )
 
 var Priorities = []interface{}{
-	"BP_PIP_VERSION",
+	EnvVersion,
 }
