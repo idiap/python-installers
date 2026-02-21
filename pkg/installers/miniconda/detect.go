@@ -20,12 +20,12 @@ func Detect() packit.DetectFunc {
 	return func(context packit.DetectContext) (packit.DetectResult, error) {
 		var requirements []packit.BuildPlanRequirement
 
-		if version, ok := os.LookupEnv("BP_MINICONDA_VERSION"); ok {
+		if version, ok := os.LookupEnv(EnvVersion); ok {
 			requirements = []packit.BuildPlanRequirement{
 				{
 					Name: Conda,
 					Metadata: build.BuildPlanMetadata{
-						VersionSource: "BP_MINICONDA_VERSION",
+						VersionSource: EnvVersion,
 						Version:       version,
 					},
 				},

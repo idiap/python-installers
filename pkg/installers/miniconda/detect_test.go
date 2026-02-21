@@ -39,7 +39,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 			Expect(result).To(Equal(packit.DetectResult{
 				Plan: packit.BuildPlan{
 					Provides: []packit.BuildPlanProvision{
-						{Name: "conda"},
+						{Name: miniconda.Conda},
 					},
 				},
 			}))
@@ -48,7 +48,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when BP_MINICONDA_VERSION is set", func() {
 		it.Before(func() {
-			t.Setenv("BP_MINICONDA_VERSION", "some-version")
+			t.Setenv(miniconda.EnvVersion, "some-version")
 		})
 
 		it("returns a build plan that provides the version of conda from BP_MINICONDA_VERSION", func() {
@@ -57,14 +57,14 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(result.Plan).To(Equal(packit.BuildPlan{
 				Provides: []packit.BuildPlanProvision{
-					{Name: "conda"},
+					{Name: miniconda.Conda},
 				},
 				Requires: []packit.BuildPlanRequirement{
 					{
 						Name: "conda",
 						Metadata: build.BuildPlanMetadata{
 							Version:       "some-version",
-							VersionSource: "BP_MINICONDA_VERSION",
+							VersionSource: miniconda.EnvVersion,
 						},
 					},
 				},
