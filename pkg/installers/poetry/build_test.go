@@ -21,9 +21,9 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
-	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
-	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"

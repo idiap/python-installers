@@ -15,7 +15,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"

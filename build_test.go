@@ -22,9 +22,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
-	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
-	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	minicondafakes "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
@@ -37,6 +36,7 @@ import (
 	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 	uvfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/uv/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
 
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"

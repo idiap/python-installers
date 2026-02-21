@@ -10,7 +10,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 // Return a pip requirement

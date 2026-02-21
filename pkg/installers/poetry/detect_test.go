@@ -17,7 +17,7 @@ import (
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 func testDetect(t *testing.T, context spec.G, it spec.S) {

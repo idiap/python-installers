@@ -16,14 +16,14 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
 	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
+	"github.com/paketo-buildpacks/python-installers/pkg/sbom"
 )
 
 func main() {

@@ -12,7 +12,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/fs"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 // Detect will return a packit.DetectFunc that will be invoked during the

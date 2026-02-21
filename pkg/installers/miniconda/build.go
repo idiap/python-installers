@@ -14,8 +14,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/dependency"
 )
 
 //go:generate faux --interface Runner --output fakes/runner.go

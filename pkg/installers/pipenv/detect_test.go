@@ -13,7 +13,7 @@ import (
 
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
 
 	. "github.com/onsi/gomega"

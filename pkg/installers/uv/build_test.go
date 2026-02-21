@@ -15,9 +15,9 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
-	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/dependency/fakes"
-	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/common/sbom/fakes"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
 
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/uv/fakes"

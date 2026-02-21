@@ -18,7 +18,7 @@ import (
 	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 )
 
 type PackagerParameters interface {

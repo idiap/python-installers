@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/common/build"
+	"github.com/paketo-buildpacks/python-installers/pkg/build"
 	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 
 	"github.com/paketo-buildpacks/packit/v2"
