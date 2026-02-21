@@ -19,8 +19,10 @@ const (
 	DepKey = "dependency-sha"
 
 	PixiArchiveTemplateName = "uv-%s-unknown-linux-musl"
+
+	EnvVersion = "BP_PIXI_VERSION"
 )
 
 var Priorities = []interface{}{
-	"BP_PIXI_VERSION",
+	EnvVersion,
 }
