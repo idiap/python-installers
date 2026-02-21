@@ -10,15 +10,17 @@ import (
 	"os"
 
 	"github.com/paketo-buildpacks/packit/v2/pexec"
+
+	"github.com/paketo-buildpacks/python-installers/pkg/executable"
 )
 
 // SiteProcess implements the Executable interface.
 type SiteProcess struct {
-	executable Executable
+	executable executable.Executable
 }
 
 // NewSiteProcess creates an instance of the SiteProcess given an Executable.
-func NewSiteProcess(executable Executable) SiteProcess {
+func NewSiteProcess(executable executable.Executable) SiteProcess {
 	return SiteProcess{
 		executable: executable,
 	}
