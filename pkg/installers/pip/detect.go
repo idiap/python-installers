@@ -15,7 +15,7 @@ import (
 
 // Return a pip requirement
 func GetVersionedRequirement() *packit.BuildPlanRequirement {
-	pipVersion := os.Getenv("BP_PIP_VERSION")
+	pipVersion := os.Getenv(EnvVersion)
 	if pipVersion == "" {
 		return nil
 	}
@@ -33,7 +33,7 @@ func GetVersionedRequirement() *packit.BuildPlanRequirement {
 	return &packit.BuildPlanRequirement{
 		Name: Pip,
 		Metadata: build.BuildPlanMetadata{
-			VersionSource: "BP_PIP_VERSION",
+			VersionSource: EnvVersion,
 			Version:       pipVersion,
 		},
 	}

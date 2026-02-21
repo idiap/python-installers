@@ -18,6 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 
 	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
 )
 
 func pipTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
@@ -160,7 +161,7 @@ func pipTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIP_VERSION": dependencies[0].Version}).
+				WithEnv(map[string]string{pip.EnvVersion: dependencies[0].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -179,7 +180,7 @@ func pipTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_PIP_VERSION": dependencies[1].Version}).
+				WithEnv(map[string]string{pip.EnvVersion: dependencies[1].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
