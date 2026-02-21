@@ -45,12 +45,12 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		if version, ok := os.LookupEnv("BP_UV_VERSION"); ok {
+		if version, ok := os.LookupEnv(EnvVersion); ok {
 			plan.Requires = []packit.BuildPlanRequirement{
 				{
 					Name: Uv,
 					Metadata: build.BuildPlanMetadata{
-						VersionSource: "BP_UV_VERSION",
+						VersionSource: EnvVersion,
 						Version:       version,
 					},
 				},

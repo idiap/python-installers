@@ -20,8 +20,10 @@ const (
 	DepKey = "dependency-sha"
 
 	UvArchiveTemplateName = "uv-%s-unknown-linux-gnu"
+
+	EnvVersion = "BP_UV_VERSION"
 )
 
 var Priorities = []interface{}{
-	"BP_UV_VERSION",
+	EnvVersion,
 }

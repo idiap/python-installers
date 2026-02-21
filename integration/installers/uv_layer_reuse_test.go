@@ -18,6 +18,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 
 	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
 )
 
 func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
@@ -157,7 +158,7 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_UV_VERSION": dependencies[0].Version}).
+				WithEnv(map[string]string{uv.EnvVersion: dependencies[0].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
@@ -175,7 +176,7 @@ func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_UV_VERSION": dependencies[2].Version}).
+				WithEnv(map[string]string{uv.EnvVersion: dependencies[2].Version}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 

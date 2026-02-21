@@ -60,7 +60,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when the BP_UV_VERSION is set", func() {
 		it.Before(func() {
-			t.Setenv("BP_UV_VERSION", "some-version")
+			t.Setenv(uv.EnvVersion, "some-version")
 		})
 
 		it("returns a plan that requires that version of uv", func() {
@@ -77,7 +77,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						{
 							Name: uv.Uv,
 							Metadata: build.BuildPlanMetadata{
-								VersionSource: "BP_UV_VERSION",
+								VersionSource: uv.EnvVersion,
 								Version:       "some-version",
 							},
 						},
