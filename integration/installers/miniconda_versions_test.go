@@ -17,6 +17,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 
 	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
 )
 
 func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
@@ -81,7 +82,7 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_MINICONDA_VERSION": firstMinicondaVersion}).
+				WithEnv(map[string]string{miniconda.EnvVersion: firstMinicondaVersion}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), firstLogs.String)
 
@@ -110,7 +111,7 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_MINICONDA_VERSION": secondMinicondaVersion}).
+				WithEnv(map[string]string{miniconda.EnvVersion: secondMinicondaVersion}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), secondLogs.String)
 

@@ -17,6 +17,7 @@ import (
 	. "github.com/paketo-buildpacks/occam/matchers"
 
 	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
+	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
 )
 
 func poetryTestVersions(t *testing.T, context spec.G, it spec.S) {
@@ -82,7 +83,7 @@ func poetryTestVersions(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_POETRY_VERSION": firstPoetryVersion}).
+				WithEnv(map[string]string{poetry.EnvVersion: firstPoetryVersion}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), firstLogs.String)
 
@@ -112,7 +113,7 @@ func poetryTestVersions(t *testing.T, context spec.G, it spec.S) {
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_POETRY_VERSION": secondPoetryVersion}).
+				WithEnv(map[string]string{poetry.EnvVersion: secondPoetryVersion}).
 				Execute(name, source)
 			Expect(err).ToNot(HaveOccurred(), secondLogs.String)
 

@@ -61,7 +61,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when the BP_PIXI_VERSION is set", func() {
 		it.Before(func() {
-			t.Setenv("BP_PIXI_VERSION", "some-version")
+			t.Setenv(pixi.EnvVersion, "some-version")
 		})
 
 		it("returns a plan that requires that version of pixi", func() {
@@ -78,7 +78,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						{
 							Name: pixi.Pixi,
 							Metadata: build.BuildPlanMetadata{
-								VersionSource: "BP_PIXI_VERSION",
+								VersionSource: pixi.EnvVersion,
 								Version:       "some-version",
 							},
 						},

@@ -69,7 +69,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when BP_PIPENV_VERSION is set", func() {
 		it.Before(func() {
-			t.Setenv("BP_PIPENV_VERSION", "1.2.3")
+			t.Setenv(pipenv.EnvVersion, "1.2.3")
 		})
 
 		it("returns a plan that provides a specific pipenv version", func() {
@@ -102,7 +102,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 							Name: pipenv.Pipenv,
 							Metadata: build.BuildPlanMetadata{
 								Version:       "1.2.3",
-								VersionSource: "BP_PIPENV_VERSION",
+								VersionSource: pipenv.EnvVersion,
 							},
 						},
 					},

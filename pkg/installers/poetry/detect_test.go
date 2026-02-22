@@ -83,7 +83,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 
 	context("when the BP_POETRY_VERSION is set", func() {
 		it.Before(func() {
-			t.Setenv("BP_POETRY_VERSION", "some-version")
+			t.Setenv(poetry.EnvVersion, "some-version")
 		})
 
 		it("returns a plan that requires that version of poetry", func() {
@@ -116,7 +116,7 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 						{
 							Name: poetry.PoetryDependency,
 							Metadata: build.BuildPlanMetadata{
-								VersionSource: "BP_POETRY_VERSION",
+								VersionSource: poetry.EnvVersion,
 								Version:       "some-version",
 							},
 						},

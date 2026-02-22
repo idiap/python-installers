@@ -68,11 +68,11 @@ func Detect(parser PyProjectParser) packit.DetectFunc {
 
 		requirements = append(requirements, pip.GetRequirement())
 
-		if version, ok := os.LookupEnv("BP_POETRY_VERSION"); ok {
+		if version, ok := os.LookupEnv(EnvVersion); ok {
 			requirements = append(requirements, packit.BuildPlanRequirement{
 				Name: PoetryDependency,
 				Metadata: build.BuildPlanMetadata{
-					VersionSource: "BP_POETRY_VERSION",
+					VersionSource: EnvVersion,
 					Version:       version,
 				},
 			})

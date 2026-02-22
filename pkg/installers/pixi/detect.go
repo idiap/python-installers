@@ -43,12 +43,12 @@ func Detect() packit.DetectFunc {
 			},
 		}
 
-		if version, ok := os.LookupEnv("BP_PIXI_VERSION"); ok {
+		if version, ok := os.LookupEnv(EnvVersion); ok {
 			plan.Requires = []packit.BuildPlanRequirement{
 				{
 					Name: Pixi,
 					Metadata: build.BuildPlanMetadata{
-						VersionSource: "BP_PIXI_VERSION",
+						VersionSource: EnvVersion,
 						Version:       version,
 					},
 				},

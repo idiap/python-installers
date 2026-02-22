@@ -9,6 +9,7 @@ const (
 	DependencyChecksumKey = "dependency_checksum"
 	CPython               = "cpython"
 	Pip                   = "pip"
+	EnvVersion            = "BP_PIPENV_VERSION"
 )
 
-var Priorities = []interface{}{"BP_PIPENV_VERSION"}
+var Priorities = []interface{}{EnvVersion}

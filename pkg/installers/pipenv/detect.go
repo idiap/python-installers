@@ -35,13 +35,13 @@ func Detect() packit.DetectFunc {
 
 		requirements = append(requirements, pip.GetRequirement())
 
-		pipEnvVersion, ok := os.LookupEnv("BP_PIPENV_VERSION")
+		pipEnvVersion, ok := os.LookupEnv(EnvVersion)
 		if ok {
 			requirements = append(requirements, packit.BuildPlanRequirement{
 				Name: Pipenv,
 				Metadata: build.BuildPlanMetadata{
 					Version:       pipEnvVersion,
-					VersionSource: "BP_PIPENV_VERSION",
+					VersionSource: EnvVersion,
 				},
 			})
 		}
