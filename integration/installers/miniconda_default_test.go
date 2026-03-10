@@ -68,7 +68,7 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				err  error
 			)
 
-			image, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+			image, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
@@ -140,7 +140,7 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				source, err = occam.Source(filepath.Join("testdata", "conda", "miniconda_app"))
 				Expect(err).NotTo(HaveOccurred())
 
-				image, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+				image, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 					WithPullPolicy("never").
 					WithBuildpacks(
 						settings.Buildpacks.PythonInstallers.Online,

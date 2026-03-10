@@ -63,7 +63,7 @@ func minicondaTestOffline(t *testing.T, context spec.G, it spec.S) {
 			var err error
 
 			var logs fmt.Stringer
-			image, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+			image, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Offline,
