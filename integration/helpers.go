@@ -81,7 +81,10 @@ func (r *RetryBuild) Build(packBuild occam.PackBuild, name string, source string
 	var logs fmt.Stringer
 	var errs error
 
-	for i := range r.retry {
+	for i := range r.retry + 1 {
+		if i > 0 {
+			r.t.Logf("Retry %v\n", i)
+		}
 		var err error
 		image, logs, err = packBuild.Execute(name, source)
 		if err == nil {
@@ -89,7 +92,6 @@ func (r *RetryBuild) Build(packBuild occam.PackBuild, name string, source string
 		} else {
 			errs = errors.Join(errs, err)
 			r.t.Logf("Build failed: %v\n", err)
-			r.t.Logf("Retry %v\n", i)
 		}
 	}
 
