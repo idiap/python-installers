@@ -76,7 +76,7 @@ type RetryBuild struct {
 	retry int
 }
 
-func (r *RetryBuild) Build(packBuild occam.PackBuild, name string, source string) (occam.Image, fmt.Stringer, error) {
+func (r *RetryBuild) Execute(packBuild occam.PackBuild, name string, source string) (occam.Image, fmt.Stringer, error) {
 	var image occam.Image
 	var logs fmt.Stringer
 	var errs error

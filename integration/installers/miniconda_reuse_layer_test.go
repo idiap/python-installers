@@ -79,7 +79,7 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				secondContainer occam.Container
 			)
 
-			firstImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+			firstImage, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
@@ -98,7 +98,7 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			containerIDs[firstContainer.ID] = struct{}{}
 
-			secondImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+			secondImage, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
@@ -157,7 +157,7 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "miniconda3")
 
-			firstImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+			firstImage, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
@@ -177,7 +177,7 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			containerIDs[firstContainer.ID] = struct{}{}
 
-			secondImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
+			secondImage, logs, err = retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,

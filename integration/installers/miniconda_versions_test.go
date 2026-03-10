@@ -78,7 +78,7 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(firstMinicondaVersion).NotTo(Equal(secondMinicondaVersion))
 
-			firstImage, firstLogs, err := retryBuild.Build(pack.WithNoColor().Build.
+			firstImage, firstLogs, err := retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
@@ -109,7 +109,7 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(ContainSubstring(fmt.Sprintf(`conda %s`, firstMinicondaVersion)))
 
-			secondImage, secondLogs, err := retryBuild.Build(pack.WithNoColor().Build.
+			secondImage, secondLogs, err := retryBuild.Execute(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
