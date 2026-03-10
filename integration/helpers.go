@@ -6,6 +6,7 @@
 package integration_helpers
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -78,17 +79,19 @@ type RetryBuild struct {
 func (r *RetryBuild) Build(packBuild occam.PackBuild, name string, source string) (occam.Image, fmt.Stringer, error) {
 	var image occam.Image
 	var logs fmt.Stringer
-	var err error
+	var errs error
 
 	for i := range r.retry {
+		var err error
 		image, logs, err = packBuild.Execute(name, source)
 		if err == nil {
 			return image, logs, err
 		} else {
+			errs = errors.Join(errs, err)
 			r.t.Logf("Build failed: %v\n", err)
 			r.t.Logf("Retry %v\n", i)
 		}
 	}
 
-	return image, logs, err
+	return image, logs, errs
 }
