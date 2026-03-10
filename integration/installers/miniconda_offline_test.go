@@ -14,14 +14,19 @@ import (
 	"github.com/sclevine/spec"
 
 	. "github.com/onsi/gomega"
+
+	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
 )
 
 func minicondaTestOffline(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
-		pack       occam.Pack
-		docker     occam.Docker
+
+		retryBuild = integration_helpers.NewRetryBuild(t, 3)
+
+		pack   occam.Pack
+		docker occam.Docker
 	)
 
 	it.Before(func() {
@@ -58,14 +63,16 @@ func minicondaTestOffline(t *testing.T, context spec.G, it spec.S) {
 			var err error
 
 			var logs fmt.Stringer
-			image, logs, err = pack.WithNoColor().Build.
+			image, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Offline,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithNetwork("none").
-				Execute(name, source)
+				WithNetwork("none"),
+				name,
+				source,
+			)
 
 			Expect(err).NotTo(HaveOccurred(), logs.String())
 

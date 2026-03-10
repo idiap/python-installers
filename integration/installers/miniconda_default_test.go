@@ -16,12 +16,16 @@ import (
 
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
+
+	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
 )
 
 func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
+
+		retryBuild = integration_helpers.NewRetryBuild(t, 3)
 
 		pack   occam.Pack
 		docker occam.Docker
@@ -64,13 +68,15 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				err  error
 			)
 
-			image, logs, err = pack.WithNoColor().Build.
+			image, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
-				).
-				Execute(name, source)
+				),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			Expect(logs).To(ContainLines(
@@ -134,7 +140,7 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 				source, err = occam.Source(filepath.Join("testdata", "conda", "miniconda_app"))
 				Expect(err).NotTo(HaveOccurred())
 
-				image, logs, err = pack.WithNoColor().Build.
+				image, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 					WithPullPolicy("never").
 					WithBuildpacks(
 						settings.Buildpacks.PythonInstallers.Online,
@@ -143,8 +149,10 @@ func minicondaTestDefault(t *testing.T, context spec.G, it spec.S) {
 					WithEnv(map[string]string{
 						"BP_LOG_LEVEL": "DEBUG",
 					}).
-					WithSBOMOutputDir(sbomDir).
-					Execute(name, source)
+					WithSBOMOutputDir(sbomDir),
+					name,
+					source,
+				)
 				Expect(err).ToNot(HaveOccurred(), logs.String)
 
 				container, err = docker.Container.Run.
