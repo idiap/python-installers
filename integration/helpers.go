@@ -5,6 +5,13 @@
 
 package integration_helpers
 
+import (
+	"fmt"
+	"testing"
+
+	"github.com/paketo-buildpacks/occam"
+)
+
 type Buildpack struct {
 	ID   string
 	Name string
@@ -57,4 +64,31 @@ func DependenciesForId(dependencies []Dependency, id string) []Dependency {
 	}
 
 	return output
+}
+
+func NewRetryBuild(t *testing.T, retry int) RetryBuild {
+	return RetryBuild{t, retry}
+}
+
+type RetryBuild struct {
+	t     *testing.T
+	retry int
+}
+
+func (r *RetryBuild) Build(packBuild occam.PackBuild, name string, source string) (occam.Image, fmt.Stringer, error) {
+	var image occam.Image
+	var logs fmt.Stringer
+	var err error
+
+	for i := range r.retry {
+		image, logs, err = packBuild.Execute(name, source)
+		if err == nil {
+			return image, logs, err
+		} else {
+			r.t.Logf("Build failed: %v\n", err)
+			r.t.Logf("Retry %v\n", i)
+		}
+	}
+
+	return image, logs, err
 }

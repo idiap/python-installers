@@ -25,6 +25,8 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
 
+		retryBuild = integration_helpers.NewRetryBuild(t, 3)
+
 		pack   occam.Pack
 		docker occam.Docker
 
@@ -77,13 +79,15 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 				secondContainer occam.Container
 			)
 
-			firstImage, logs, err = pack.WithNoColor().Build.
+			firstImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
-				).
-				Execute(name, source)
+				),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			imageIDs[firstImage.ID] = struct{}{}
@@ -94,13 +98,15 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			containerIDs[firstContainer.ID] = struct{}{}
 
-			secondImage, logs, err = pack.WithNoColor().Build.
+			secondImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
-				).
-				Execute(name, source)
+				),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			imageIDs[secondImage.ID] = struct{}{}
@@ -151,14 +157,16 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			dependencies := integration_helpers.DependenciesForId(buildpackInfo.Metadata.Dependencies, "miniconda3")
 
-			firstImage, logs, err = pack.WithNoColor().Build.
+			firstImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_MINICONDA_VERSION": dependencies[0].Version}).
-				Execute(name, source)
+				WithEnv(map[string]string{"BP_MINICONDA_VERSION": dependencies[0].Version}),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			imageIDs[firstImage.ID] = struct{}{}
@@ -169,14 +177,16 @@ func minicondaTestLayerReuse(t *testing.T, context spec.G, it spec.S) {
 
 			containerIDs[firstContainer.ID] = struct{}{}
 
-			secondImage, logs, err = pack.WithNoColor().Build.
+			secondImage, logs, err = retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{"BP_MINICONDA_VERSION": dependencies[2].Version}).
-				Execute(name, source)
+				WithEnv(map[string]string{"BP_MINICONDA_VERSION": dependencies[2].Version}),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), logs.String)
 
 			imageIDs[secondImage.ID] = struct{}{}

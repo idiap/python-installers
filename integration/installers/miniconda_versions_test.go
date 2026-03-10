@@ -25,6 +25,8 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 		Expect     = NewWithT(t).Expect
 		Eventually = NewWithT(t).Eventually
 
+		retryBuild = integration_helpers.NewRetryBuild(t, 3)
+
 		pack   occam.Pack
 		docker occam.Docker
 	)
@@ -76,14 +78,16 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 
 			Expect(firstMinicondaVersion).NotTo(Equal(secondMinicondaVersion))
 
-			firstImage, firstLogs, err := pack.WithNoColor().Build.
+			firstImage, firstLogs, err := retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{miniconda.EnvVersion: firstMinicondaVersion}).
-				Execute(name, source)
+				WithEnv(map[string]string{miniconda.EnvVersion: firstMinicondaVersion}),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), firstLogs.String)
 
 			imagesMap[firstImage.ID] = nil
@@ -105,14 +109,16 @@ func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
 				return cLogs.String()
 			}).Should(ContainSubstring(fmt.Sprintf(`conda %s`, firstMinicondaVersion)))
 
-			secondImage, secondLogs, err := pack.WithNoColor().Build.
+			secondImage, secondLogs, err := retryBuild.Build(pack.WithNoColor().Build.
 				WithPullPolicy("never").
 				WithBuildpacks(
 					settings.Buildpacks.PythonInstallers.Online,
 					settings.Buildpacks.BuildPlan.Online,
 				).
-				WithEnv(map[string]string{miniconda.EnvVersion: secondMinicondaVersion}).
-				Execute(name, source)
+				WithEnv(map[string]string{miniconda.EnvVersion: secondMinicondaVersion}),
+				name,
+				source,
+			)
 			Expect(err).ToNot(HaveOccurred(), secondLogs.String)
 
 			imagesMap[secondImage.ID] = nil
