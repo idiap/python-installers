@@ -12,8 +12,8 @@ import (
 
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/executable/fakes"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/executable/fakes"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/miniconda"
 
 	. "github.com/onsi/gomega"
 )

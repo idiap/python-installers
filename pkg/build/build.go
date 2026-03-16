@@ -9,7 +9,7 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/sbom"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/sbom"
 )
 
 // CommonBuildParameters are the parameters shared

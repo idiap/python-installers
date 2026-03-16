@@ -10,7 +10,7 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2/pexec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/executable"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/executable"
 )
 
 // ScriptRunner implements the Runner interface

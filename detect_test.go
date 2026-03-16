@@ -14,16 +14,16 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
-	pythoninstallers "github.com/paketo-buildpacks/python-installers"
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	pythoninstallers "github.com/paketo-buildpacks/python-package-managers-install"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
 
-	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
-	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
-	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
-	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
-	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
-	poetryfakes "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
-	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
+	miniconda "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/miniconda"
+	pip "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pip"
+	pipenv "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pipenv"
+	pixi "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pixi"
+	poetry "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/poetry"
+	poetryfakes "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/poetry/fakes"
+	uv "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/uv"
 
 	"github.com/sclevine/spec"
 

@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/uv"
 )
 
 func testUvInstallProcess(t *testing.T, context spec.G, it spec.S) {

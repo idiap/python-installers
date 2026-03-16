@@ -11,8 +11,8 @@ The Paketo Buildpack for Python Installers is a Cloud Native Buildpack that
 installs python package managers.
 
 The buildpack is published for consumption at
-`gcr.io/paketo-buildpacks/python-installers` and
-`paketobuildpacks/python-installers`.
+`gcr.io/paketo-buildpacks/python-package-managers-install` and
+`paketobuildpacks/python-package-managers-install`.
 
 ## Behavior
 This buildpack participates if one of the following detection succeeds:

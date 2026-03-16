@@ -13,7 +13,7 @@ import (
 )
 
 func TestUnitPythonInstallers(t *testing.T) {
-	suite := spec.New("python-installers", spec.Report(report.Terminal{}), spec.Sequential())
+	suite := spec.New("python-package-managers-install", spec.Report(report.Terminal{}), spec.Sequential())
 	suite("Detect", testDetect)
 	suite("Build", testBuild)
 	suite.Run(t)

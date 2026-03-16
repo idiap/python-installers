@@ -14,12 +14,12 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/chronos"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
-	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
-	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-package-managers-install/pkg/dependency/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-package-managers-install/pkg/sbom/fakes"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda/fakes"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/miniconda"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/miniconda/fakes"
 
 	//nolint Ignore SA1019, informed usage of deprecated package
 	"github.com/paketo-buildpacks/packit/v2/paketosbom"
