@@ -15,7 +15,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
+	integration_helpers "github.com/paketo-buildpacks/python-package-managers-install/integration"
 )
 
 func minicondaTestOffline(t *testing.T, context spec.G, it spec.S) {

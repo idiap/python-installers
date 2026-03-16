@@ -22,11 +22,11 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
-	dependencyfakes "github.com/paketo-buildpacks/python-installers/pkg/dependency/fakes"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv/fakes"
-	sbomfakes "github.com/paketo-buildpacks/python-installers/pkg/sbom/fakes"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
+	dependencyfakes "github.com/paketo-buildpacks/python-package-managers-install/pkg/dependency/fakes"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pipenv"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pipenv/fakes"
+	sbomfakes "github.com/paketo-buildpacks/python-package-managers-install/pkg/sbom/fakes"
 
 	. "github.com/onsi/gomega"
 )

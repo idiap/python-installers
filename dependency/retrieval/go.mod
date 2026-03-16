@@ -1,4 +1,4 @@
-module github.com/paketo-buildpacks/python-installers/retrieval
+module github.com/paketo-buildpacks/python-package-managers-install/retrieval
 
 go 1.24.6
 

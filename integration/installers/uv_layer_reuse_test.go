@@ -17,8 +17,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
 
-	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
+	integration_helpers "github.com/paketo-buildpacks/python-package-managers-install/integration"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/uv"
 )
 
 func uvTestLayerReuse(t *testing.T, context spec.G, it spec.S) {

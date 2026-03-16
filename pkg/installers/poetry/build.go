@@ -14,8 +14,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2/draft"
 	"github.com/paketo-buildpacks/packit/v2/sbom"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
-	"github.com/paketo-buildpacks/python-installers/pkg/dependency"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/dependency"
 )
 
 //go:generate faux --interface InstallProcess --output fakes/install_process.go

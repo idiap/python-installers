@@ -11,14 +11,14 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/paketo-buildpacks/packit/v2/scribe"
 
-	miniconda "github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
-	pip "github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
-	pipenv "github.com/paketo-buildpacks/python-installers/pkg/installers/pipenv"
-	pixi "github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
-	poetry "github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
-	uv "github.com/paketo-buildpacks/python-installers/pkg/installers/uv"
+	miniconda "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/miniconda"
+	pip "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pip"
+	pipenv "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pipenv"
+	pixi "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pixi"
+	poetry "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/poetry"
+	uv "github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/uv"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
 )
 
 type PackagerParameters interface {

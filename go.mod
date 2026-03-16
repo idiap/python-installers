@@ -1,4 +1,4 @@
-module github.com/paketo-buildpacks/python-installers
+module github.com/paketo-buildpacks/python-package-managers-install
 
 go 1.26.1
 

@@ -13,8 +13,8 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/pixi"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pixi"
 
 	. "github.com/onsi/gomega"
 )

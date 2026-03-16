@@ -9,8 +9,8 @@ import (
 
 	"github.com/paketo-buildpacks/packit/v2"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/pip"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/pip"
 )
 
 // Detect will return a packit.DetectFunc that will be invoked during the

@@ -16,7 +16,7 @@ PATH.
 
 |  Environment Variable  | Description                                                      |
 |------------------------|------------------------------------------------------------------|
-| `$BP_MINICONDA_VERSION` | Configure the version of miniconda to install. Buildpack releases (and the pip versions for each release) can be found [here](https://github.com/idiap/python-installers/releases). |
+| `$BP_MINICONDA_VERSION` | Configure the version of miniconda to install. Buildpack releases (and the pip versions for each release) can be found [here](https://github.com/idiap/python-package-managers-install/releases). |
 
 ## Integration
 

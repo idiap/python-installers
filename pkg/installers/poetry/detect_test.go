@@ -14,10 +14,10 @@ import (
 	"github.com/paketo-buildpacks/packit/v2"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/poetry/fakes"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/poetry"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/poetry/fakes"
 
-	"github.com/paketo-buildpacks/python-installers/pkg/build"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/build"
 )
 
 func testDetect(t *testing.T, context spec.G, it spec.S) {

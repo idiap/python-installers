@@ -16,8 +16,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/paketo-buildpacks/occam/matchers"
 
-	integration_helpers "github.com/paketo-buildpacks/python-installers/integration"
-	"github.com/paketo-buildpacks/python-installers/pkg/installers/miniconda"
+	integration_helpers "github.com/paketo-buildpacks/python-package-managers-install/integration"
+	"github.com/paketo-buildpacks/python-package-managers-install/pkg/installers/miniconda"
 )
 
 func minicondaTestVersions(t *testing.T, context spec.G, it spec.S) {
