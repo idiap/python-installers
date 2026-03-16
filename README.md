@@ -17,7 +17,7 @@ The buildpack is published for consumption at
 ## Behavior
 This buildpack participates if one of the following detection succeeds:
 
-- (miniconda)[pkg/installers/minconda/README.md] -> Always
+- (miniconda)[pkg/installers/miniconda/README.md] -> Always
 - (pip)[pkg/installers/pip/README.md] -> Always
 - (pipenv)[pkg/installers/pipenv/README.md] -> Always
 - (poetry)[pkg/installers/poetry/README.md] -> `pyproject.toml` is present in the root folder
