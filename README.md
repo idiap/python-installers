@@ -22,6 +22,7 @@ This buildpack participates if one of the following detection succeeds:
 - (pipenv)[pkg/installers/pipenv/README.md] -> Always
 - (poetry)[pkg/installers/poetry/README.md] -> `pyproject.toml` is present in the root folder
 - (uv)[pkg/installers/uv/README.md] -> `uv.lock` is present in the root folder
+- (pixi)[pkg/installers/pixi/README.md] -> `pixi.lock` is present in the root folder
 
 The buildpack will do the following:
 * At build time:
